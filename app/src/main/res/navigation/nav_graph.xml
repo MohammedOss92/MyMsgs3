@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/firsFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.FirstFragment"
+        android:label="@string/aa"
+        tools:layout="@layout/fragment_first" >
+        <action
+            android:id="@+id/action_firsFragment_to_secondFragment"
+            app:destination="@id/secondFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragment"
+        android:label="@string/aa"
+        tools:layout="@layout/fragment_second" >
+        <argument
+            android:name="id"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_secondFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+        <action
+            android:id="@+id/action_secondFragment_to_editFragment3"
+            app:destination="@id/editFragment" />
+        <!--        <argument-->
+<!--            android:name="msgType"-->
+<!--            app:argType="string" />-->
+    </fragment>
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.FavoriteFragment"
+        android:label="fragment_favorite"
+        tools:layout="@layout/fragment_favorite" >
+        <action
+            android:id="@+id/action_favoriteFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+        <action
+            android:id="@+id/action_favoriteFragment_to_editFragment2"
+            app:destination="@id/editFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_splash" >
+        <action
+            android:id="@+id/action_splashFragment_to_firsFragment"
+            app:destination="@id/firsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.EditFragment"
+        android:label="fragment_edit"
+        tools:layout="@layout/fragment_edit" >
+        <argument
+            android:name="msgname"
+            app:argType="string" />
+
+<!--        <argument-->
+<!--            android:name="aa"-->
+<!--            app:argType="string" />-->
+    </fragment>
+    <fragment
+        android:id="@+id/newMsgsFragment"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.fragments.NewMsgsFragment"
+        android:label="fragment_new_msgs"
+        tools:layout="@layout/fragment_new_msgs" >
+        <action
+            android:id="@+id/action_newMsgsFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+
+
+        <action
+            android:id="@+id/action_secondFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/settingsFrag"
+        android:name="com.abdallah.sarrawi.mymsgs.ui.prfernces.SettingsFragment"
+        android:label="SettingsFrag"
+        tools:layout="@layout/fragment_settings"/>
+</navigation>

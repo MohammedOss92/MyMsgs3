@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "285691283253",
+    "project_id": "my-notifications-d05db",
+    "storage_bucket": "my-notifications-d05db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285691283253:android:5aac36cb241b043d20ae7c",
+        "android_client_info": {
+          "package_name": "com.abdallah.sarrawi.mymsgs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "285691283253-o9193b0eu17ggnm3i7t5cjtkgd95q43l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClyyn8OGFUA_UwBx8FsL2XhQxkDOdRUtg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "285691283253-o9193b0eu17ggnm3i7t5cjtkgd95q43l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

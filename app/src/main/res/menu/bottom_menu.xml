@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/firsFragment"
+
+        android:icon="@drawable/ic_home"
+        android:title="الرئيسية" />
+
+    <item
+        android:id="@+id/favoriteFragment"
+
+        android:icon="@drawable/ic_favorite"
+        android:title="المفصلة" />
+
+    <item
+        android:id="@+id/newMsgsFragment"
+        android:icon="@drawable/new_msg"
+        android:title="جديده"/>
+
+    <item
+        android:id="@+id/settingsFrag"
+        android:icon="@drawable/ic_action_set"
+        android:title="الاعدادات"/>
+
+
+</menu>

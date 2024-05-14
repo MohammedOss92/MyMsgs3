@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_refresh" android:orderInCategory="100"
+        android:title="تحديث" app:showAsAction="collapseActionView" />
+
+    <item android:id="@+id/action_theme" android:icon="@drawable/ic_brightness_2_white_24dp"
+        android:orderInCategory="100"
+        android:title="" app:showAsAction="always" />
+
+</menu>

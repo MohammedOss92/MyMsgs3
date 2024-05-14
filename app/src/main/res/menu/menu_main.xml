@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".ui.MainActivity">
+
+<!--    <item android:id="@+id/mode" android:icon="@drawable/ic_brightness_2_white_24dp"-->
+<!--        android:orderInCategory="100" app:showAsAction="always"-->
+<!--        android:title="" />-->
+
+<!--    <item android:id="@+id/action_refresh" android:title="تحديث"-->
+<!--        android:orderInCategory="100" app:showAsAction="always" />-->
+</menu>
