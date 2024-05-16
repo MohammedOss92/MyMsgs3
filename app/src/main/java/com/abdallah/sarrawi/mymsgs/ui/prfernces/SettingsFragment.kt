@@ -46,7 +46,7 @@ class SettingsFragment : Fragment() {
         binding.privacy.setOnClickListener {
 
             val url =
-                "https://sites.google.com/view/privacypolicy-msgnew/%D8%A7%D9%84%D8%B5%D9%81%D8%AD%D8%A9-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9" // استبدل هذا برابط سياسة الخصوصية الخاص بك
+                "https://sites.google.com/view/mymsgs/%D8%A7%D9%84%D8%B5%D9%81%D8%AD%D8%A9-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9" // استبدل هذا برابط سياسة الخصوصية الخاص بك
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
         }

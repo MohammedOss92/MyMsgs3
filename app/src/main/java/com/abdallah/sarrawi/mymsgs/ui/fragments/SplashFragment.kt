@@ -38,7 +38,7 @@ class SplashFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val tvSplash:TextView =view.findViewById(R.id.mmm)
+//        val tvSplash:TextView =view.findViewById(R.id.mmm)
         val imgSplash:ImageView =view.findViewById(R.id.imageView)
         val currentDate = Calendar.getInstance().time
 
@@ -49,7 +49,7 @@ class SplashFragment : Fragment() {
         val currentYear = yearFormat.format(currentDate)
 
         // قم بعرض السنة في TextView
-        tvSplash.text = "مـسـجـاتـي \n$currentYear"
+//        tvSplash.text = "مـسـجـاتـي \n$currentYear"
 //        val slideAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.anim)
 
 //        tvSplash.animate().translationXBy(-1000f).duration=3000
@@ -61,10 +61,10 @@ class SplashFragment : Fragment() {
         var uptodown = AnimationUtils.loadAnimation(requireContext(), R.anim.uptodown)
         var downtoup = AnimationUtils.loadAnimation(requireContext(), R.anim.downtoup)
 
-        tvSplash.animate(). rotation(360f).duration=3000
+//        tvSplash.animate(). rotation(360f).duration=3000
         imgSplash.animate().rotation(360f).duration=3000
 
-        tvSplash.setAnimation(downtoup)
+//        tvSplash.setAnimation(downtoup)
         imgSplash.setAnimation(uptodown)
 
         Handler(Looper.myLooper()!!).postDelayed({
