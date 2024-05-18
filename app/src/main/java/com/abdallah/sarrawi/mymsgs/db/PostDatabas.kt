@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.abdallah.sarrawi.mymsgs.db.Dao.FavoriteDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsTypesDao
@@ -13,8 +15,12 @@ import com.abdallah.sarrawi.mymsgs.models.LocalDateTimeConverter
 import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 
-@Database(entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class], version = 6, exportSchema = false)
-//@TypeConverters(LocalDateTimeConverter::class)  // تأكد من إزالة التعليق إذا كنت بحاجة إلى محولات الأنواع
+@Database(
+    entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class],
+    version = 7,
+    exportSchema = false
+)
+//@TypeConverters(LocalDateTimeConverter::class)
 abstract class PostDatabase : RoomDatabase() {
 
     abstract fun typesDao(): MsgsTypesDao
@@ -38,8 +44,14 @@ abstract class PostDatabase : RoomDatabase() {
                 PostDatabase::class.java,
                 "PostDatabase.db"
             )
-                .fallbackToDestructiveMigrationFrom(6)
+                .fallbackToDestructiveMigration()
                 .build()
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // لا يوجد تعديل في الهيكل أو البيانات
+            }
         }
     }
 }
