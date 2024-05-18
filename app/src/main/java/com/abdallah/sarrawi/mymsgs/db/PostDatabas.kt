@@ -1,14 +1,10 @@
 package com.abdallah.sarrawi.mymsgs.db
 
-
 import android.content.Context
-import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.sqlite.db.SupportSQLiteDatabase
-import androidx.room.migration.Migration
 import com.abdallah.sarrawi.mymsgs.db.Dao.FavoriteDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsTypesDao
@@ -18,7 +14,7 @@ import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 
 @Database(entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class], version = 6, exportSchema = false)
-//@TypeConverters(LocalDateTimeConverter::class)
+//@TypeConverters(LocalDateTimeConverter::class)  // تأكد من إزالة التعليق إذا كنت بحاجة إلى محولات الأنواع
 abstract class PostDatabase : RoomDatabase() {
 
     abstract fun typesDao(): MsgsTypesDao
@@ -37,13 +33,13 @@ abstract class PostDatabase : RoomDatabase() {
         }
 
         private fun buildDatabase(context: Context): PostDatabase {
-            return Room.databaseBuilder(context.applicationContext, PostDatabase::class.java, "PostDatabase.db")
-
+            return Room.databaseBuilder(
+                context.applicationContext,
+                PostDatabase::class.java,
+                "PostDatabase.db"
+            )
+                .fallbackToDestructiveMigrationFrom(6)
                 .build()
         }
-
-
     }
 }
-
-
