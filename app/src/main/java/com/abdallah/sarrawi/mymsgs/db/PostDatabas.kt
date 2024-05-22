@@ -17,10 +17,10 @@ import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 
 @Database(
     entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class],
-    version = 7,
+    version = 1,
     exportSchema = false
 )
-//@TypeConverters(LocalDateTimeConverter::class)
+@TypeConverters(LocalDateTimeConverter::class)
 abstract class PostDatabase : RoomDatabase() {
 
     abstract fun typesDao(): MsgsTypesDao
@@ -48,10 +48,5 @@ abstract class PostDatabase : RoomDatabase() {
                 .build()
         }
 
-        val MIGRATION_6_7 = object : Migration(6, 7) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                // لا يوجد تعديل في الهيكل أو البيانات
-            }
-        }
     }
 }

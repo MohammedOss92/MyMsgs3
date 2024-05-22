@@ -22,16 +22,16 @@ data class FavoriteModel(
 
     @ColumnInfo("TypeTitle")
     @SerializedName("TypeTitle")
-    var TypeTitle : String,
+    var TypeTitle: String,
 
     @ColumnInfo("new_msgs")
     @SerializedName("new_msgs")
-    var new_msgs : Int,
+    var new_msgs: Int,
 
     @ColumnInfo("ID_Type_id", index = true)
     @SerializedName("ID_Type_id")
-    var ID_Type_id : Int
-//    @ColumnInfo(name = "createdAt")
-//    var createdAt: String? = null
+    var ID_Type_id: Int,
+    @ColumnInfo(name = "createdAt")
+    var createdAt: String? = null
 
 )

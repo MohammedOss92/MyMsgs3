@@ -25,17 +25,17 @@ data class MsgsModel(
 
     @ColumnInfo("new_msgs")
     @SerializedName("new_msgs")
-    var new_msgs : Int,
+    var new_msgs: Int,
 
     @ColumnInfo("ID_Type_id", index = true)
     @SerializedName("ID_Type_id")
-    var ID_Type_id : Int,
+    var ID_Type_id: Int,
 
     @ColumnInfo("is_fav")
     @SerializedName("is_fav")
-    var is_fav:Boolean = false
+    var is_fav: Boolean = false,
 
-//    @ColumnInfo(name = "createdAt")
-//    var createdAt: String? = null // قيمة افتراضية تكون null
+    @ColumnInfo(name = "createdAt")
+    var createdAt: String? = null // قيمة افتراضية تكون null
 
 )
