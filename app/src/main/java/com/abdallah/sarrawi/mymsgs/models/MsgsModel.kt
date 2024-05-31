@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 
-@Entity(tableName = "msg_table",
+@Entity(tableName = "msgs_table",
     foreignKeys =[ForeignKey(entity = MsgsTypesModel::class, childColumns = ["ID_Type_id"], parentColumns = ["id"])])
 data class MsgsModel(
 

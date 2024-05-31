@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 
-@Entity(tableName = "Favorite_table")
+@Entity(tableName = "Fav_table")
 data class FavoriteModel(
     @PrimaryKey(autoGenerate = true)
     @SerializedName("id")

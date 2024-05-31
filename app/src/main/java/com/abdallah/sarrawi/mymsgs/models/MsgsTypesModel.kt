@@ -6,7 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "msg_types_table")
+@Entity(tableName = "msgs_types_table")
 data class MsgsTypesModel(
     // // sweilem edit
 

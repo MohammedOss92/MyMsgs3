@@ -42,7 +42,7 @@ abstract class PostDatabase : RoomDatabase() {
             return Room.databaseBuilder(
                 context.applicationContext,
                 PostDatabase::class.java,
-                "PostDatabase.db"
+                "MsgsDb.db"
             )
                 .fallbackToDestructiveMigration()
                 .build()

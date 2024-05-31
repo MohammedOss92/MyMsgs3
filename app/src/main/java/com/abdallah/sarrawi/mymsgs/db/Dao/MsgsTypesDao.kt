@@ -8,14 +8,14 @@ import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 @Dao
 interface MsgsTypesDao {
 
-    @Query("SELECT * FROM msg_types_table")
+    @Query("SELECT * FROM msgs_types_table")
     fun getPosts(): LiveData<List<MsgsTypesModel>>
 
-    @Query("SELECT * FROM msg_types_table")
+    @Query("SELECT * FROM msgs_types_table")
     fun getPosts2():  List<MsgsTypesModel>
 
     // get last id to compare with server data
-    @Query("SELECT * FROM msg_types_table ORDER BY id DESC LIMIT 1")
+    @Query("SELECT * FROM msgs_types_table ORDER BY id DESC LIMIT 1")
     fun getLastId(): MsgsTypesModel
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -29,13 +29,13 @@ interface MsgsTypesDao {
 
     /************************/
 
-    @Query("SELECT * FROM msg_types_table")
+    @Query("SELECT * FROM msgs_types_table")
     suspend fun getMsgsTypes_Dao():  List<MsgsTypesModel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPosts(posts: List<MsgsTypesModel>)
 
-    @Query("DELETE FROM msg_types_table")
+    @Query("DELETE FROM msgs_types_table")
     fun deleteALlPosts()
 
 //    @Query(
@@ -47,8 +47,8 @@ interface MsgsTypesDao {
         "SELECT c.*, " +
                 "COUNT(e.ID_Type_id) AS subCount, " +
                 "SUM(CASE WHEN e.new_msgs = 1 THEN 1 ELSE 0 END) AS newMsgsCount " +
-                "FROM msg_types_table c " +
-                "LEFT JOIN msg_table e ON c.id = e.ID_Type_id " +
+                "FROM msgs_types_table c " +
+                "LEFT JOIN msgs_table e ON c.id = e.ID_Type_id " +
                 "GROUP BY c.id"
     )
     suspend fun getAllMsgTypesWithCounts(): List<MsgsTypeWithCount>?
