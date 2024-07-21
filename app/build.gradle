@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.abdallah.sarrawi.mymsgs"
         minSdk 21
-        targetSdk 33
-        versionCode 29
-        versionName "3.0"
+        targetSdk 34
+        versionCode 30
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -58,7 +58,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-
+    implementation "androidx.work:work-runtime-ktx:2.7.0"
 
     implementation 'com.google.android.gms:play-services-ads:22.0.0'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'

@@ -1,5 +1,7 @@
 package com.abdallah.sarrawi.mymsgs.broadcastReceiver
 
+import android.app.job.JobParameters
+import android.app.job.JobService
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -18,39 +20,39 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RefreshPostsService : JobIntentService() {
+//class RefreshPostsService : JobIntentService() {
+//
+//    lateinit var viewModel: MsgsTypesViewModel
+//
+//
+//
+//    companion object {
+//        private const val JOB_ID = 1001
+//
+//        fun enqueueWork(context: Context, intent: Intent) {
+//            enqueueWork(context, RefreshPostsService::class.java, JOB_ID, intent)
+//        }
+//    }
+//
+//    override fun onHandleWork(intent: Intent) {
+//        Log.d("RefreshPostsService", "Handling work")
+//
+//        val context = applicationContext as MainActivity
+//        val serviceScope = CoroutineScope(Dispatchers.Default)
+//        serviceScope.launch {
+//            val retrofitService = ApiService.provideRetrofitInstance()
+//            val mainRepository = MsgsTypesRepo(retrofitService, LocaleSource(context))
+//            val mainRepository2 = MsgsRepo(retrofitService, LocaleSource(context))
+//            val viewModel = ViewModelProvider(context).get(MsgsTypesViewModel::class.java)
+//            viewModel.refreshPosts(context)
+//        }
+//        Log.d("RefreshPostsService", "Handling work")
+//    }
+//
+//
+//}
 
-    lateinit var viewModel: MsgsTypesViewModel
-
-
-
-    companion object {
-        private const val JOB_ID = 1001
-
-        fun enqueueWork(context: Context, intent: Intent) {
-            enqueueWork(context, RefreshPostsService::class.java, JOB_ID, intent)
-        }
-    }
-
-    override fun onHandleWork(intent: Intent) {
-        Log.d("RefreshPostsService", "Handling work")
-
-        val context = applicationContext as MainActivity
-        val serviceScope = CoroutineScope(Dispatchers.Default)
-        serviceScope.launch {
-            val retrofitService = ApiService.provideRetrofitInstance()
-            val mainRepository = MsgsTypesRepo(retrofitService, LocaleSource(context))
-            val mainRepository2 = MsgsRepo(retrofitService, LocaleSource(context))
-            val viewModel = ViewModelProvider(context).get(MsgsTypesViewModel::class.java)
-            viewModel.refreshPosts(context)
-        }
-        Log.d("RefreshPostsService", "Handling work")
-    }
-
-
-}
-
-/*class RefreshPostsJobService : JobService() {
+class RefreshPostsService : JobService() {
 
     private lateinit var viewModel: MsgsTypesViewModel
 
@@ -72,7 +74,7 @@ class RefreshPostsService : JobIntentService() {
         return false
     }
 }
-*/
+
 
 /*class MainActivity : AppCompatActivity() {
 
