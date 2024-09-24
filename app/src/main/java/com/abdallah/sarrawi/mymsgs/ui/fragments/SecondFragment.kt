@@ -10,6 +10,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,10 +23,17 @@ import com.abdallah.sarrawi.mymsgs.adapter.CallBack
 import com.abdallah.sarrawi.mymsgs.api.ApiService
 import com.abdallah.sarrawi.mymsgs.databinding.FragmentSecondBinding
 import com.abdallah.sarrawi.mymsgs.db.LocaleSource
+import com.abdallah.sarrawi.mymsgs.db.PostDatabase
 import com.abdallah.sarrawi.mymsgs.models.FavoriteModel
 import com.abdallah.sarrawi.mymsgs.models.MsgModelWithTitle
+import com.abdallah.sarrawi.mymsgs.paging.MsgsAdapterPaging
+import com.abdallah.sarrawi.mymsgs.paging.MsgsTypesAdapterPaging
 import com.abdallah.sarrawi.mymsgs.repository.MsgsRepo
 import com.abdallah.sarrawi.mymsgs.ui.MainActivity
+import com.abdallah.sarrawi.mymsgs.vm.*
+import com.google.android.material.snackbar.Snackbar
+
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,20 +45,36 @@ class SecondFragment : Fragment() , CallBack {
     private val binding get() = _binding
     private var argsId = -1
     private var MsgTypes_name = ""
+    var clickCount = 0
 
 //    lateinit var  msgsAdapter :Msgs_Adapter
-    private val msgsAdapter by lazy { Msgs_Adapter(requireContext(),this) }
+//    private val msgsAdapter by lazy { Msgs_Adapter(requireContext(),this) }
+//    private val retrofitService = ApiService.provideRetrofitInstance()
+//
+//    private val mainRepository by lazy {  MsgsRepo(retrofitService, LocaleSource(requireContext())) }
+//
+//    private val viewModel: MsgsViewModel by viewModels{
+//        ViewModelFactory(mainRepository)
+//    }
+
+
+    private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this/*isDark*/) }
+    private var ID_Type_id=0
     private val retrofitService = ApiService.provideRetrofitInstance()
-
-    private val mainRepository by lazy {  MsgsRepo(retrofitService, LocaleSource(requireContext())) }
-
-    private val viewModel: MsgsViewModel by viewModels{
-        ViewModelFactory(mainRepository)
+    private val mainRepository3 by lazy { Repo_Type(retrofitService, LocaleSource(requireContext()),
+        PostDatabase.getInstance(requireContext())) }
+    private val vm_types: VM_Type by viewModels {
+        MyVMFactoryTypes(mainRepository3, requireContext(), PostDatabase.getInstance(requireContext()))
     }
 
+    // أخذ أو إنشاء VM_Msgs
+    private val vm_msgs: VM_Msgs by viewModels {
+        MyVMFactory(mainRepository3, requireContext(), PostDatabase.getInstance(requireContext()), ID_Type_id)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         argsId = SecondFragmentArgs.fromBundle(requireArguments()).id
+        Log.d("SecondFragment", "Received ID: $argsId")
 //        MsgTypes_name = SecondFragmentArgs.fromBundle(requireArguments()).msgType
         (activity as MainActivity).fragment = 2
 //        msgsAdapter = Msgs_Adapter(requireContext(),this /*,this*/ )
@@ -72,8 +96,8 @@ class SecondFragment : Fragment() , CallBack {
 
 
 
-        setUpRv()
-        adapterOnClick()
+        setup()
+
         menu_item()
 
     }
@@ -83,57 +107,122 @@ class SecondFragment : Fragment() , CallBack {
 
     }
 
-    private fun adapterOnClick(){
-//        val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-        msgsAdapter.onItemClick = { it: MsgModelWithTitle, i: Int ->
-            val fav= FavoriteModel(it.msgModel!!.id,it.msgModel!!.MessageName,it.typeTitle,it.msgModel!!.new_msgs,it.msgModel!!.ID_Type_id)
-//            fav.createdAt=currentTime
-            // check if item is favorite or not
-            if (it.msgModel!!.is_fav){
-                viewModel.update_fav(it.msgModel!!.id,false) // update favorite item state
-                viewModel.delete_fav(fav) //delete item from db
-                Toast.makeText(requireContext(),"تم الحذف من المفضلة",Toast.LENGTH_SHORT).show()
-                setUpRv()
-                msgsAdapter.notifyDataSetChanged()
+    private fun setup() {
+        if (isAdded) {
+            binding.rcMsgs.layoutManager = LinearLayoutManager(requireContext())
 
-            }else{
-                viewModel.update_fav(it.msgModel!!.id,true)
-                viewModel.add_fav(fav) // add item to db
-                Toast.makeText(requireContext(),"تم الاضافة الى المفضلة",Toast.LENGTH_SHORT).show()
-                setUpRv()
-                msgsAdapter.notifyDataSetChanged()
+            val pagingAdapter = MsgsAdapterPaging(requireContext(),this)
+            binding.rcMsgs.adapter = pagingAdapter
+//            lifecycleScope.launch {
+//                nokatViewModel.invalidatePagingSource()
+//                nokatViewModel.nokatFlow.collectLatest { pagingData ->
+//                    pagingAdapter.submitData(pagingData)
+//                }}
+
+            lifecycleScope.launch {
+
+//                vm_msgs.itemsss.collectLatest { pagingData ->
+//                    pagingAdapter.submitData(lifecycle, pagingData)
+                vm_msgs.itemsswhereID(argsId).observe(viewLifecycleOwner) { pagingData ->
+                    Log.d("PagingData", "Received paging data: ${pagingData}")
+                    pagingAdapter.submitData(lifecycle, pagingData)
+                }
             }
 
+            pagingAdapter.onItemClick = { id, item, position ->
+                clickCount++
+                if (clickCount >= 2) {
+// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
+//                    if (mInterstitialAd != null) {
+//                        mInterstitialAd?.show(requireActivity())
+//                        loadInterstitialAd()
+//                    } else {
+//                        Log.d("TAG", "The interstitial ad wasn't ready yet.")
+//                    }
+                    clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
+
+                }
+
+                val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                val fav = FavoriteModel(item.msgModel!!.id,item.msgModel!!.MessageName,item.msgModel!!.MessageName,item.msgModel!!.ID_Type_id,item.msgModel!!.ID_Type_id).apply {
+                    createdAt = currentTime
+                }
+
+                if (item.msgModel!!.is_fav) {
+                    vm_msgs.update_favs(item.msgModel!!.id, false)
+                    vm_msgs.delete_favs(fav)
+                    lifecycleScope.launch {
+                        val snackbar = Snackbar.make(requireView(), "تم الحذف من المفضلة", Snackbar.LENGTH_SHORT)
+                        snackbar.show()
+                        pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                    }
+                } else {
+                    vm_msgs.update_favs(item.msgModel!!.id, true)
+                    vm_msgs.add_favs(fav)
+                    lifecycleScope.launch {
+                        val snackbar = Snackbar.make(requireView(), "تم الاضافة الى المفضلة", Snackbar.LENGTH_SHORT)
+                        snackbar.show()
+                        pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                    }
+                }
+            }
+
+            pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-
-//        msgsAdapter.onClick={popupMenus(requireView())}
-
     }
-    private  fun setUpRv() = viewModel.viewModelScope.launch {
 
-//        binding.rcMsgTypes.apply {
-//            adapter = msgstypesAdapter
-//            setHasFixedSize(true)
+
+//    private fun adapterOnClick(){
+////        val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+//        msgsAdapter.onItemClick = { it: MsgModelWithTitle, i: Int ->
+//            val fav= FavoriteModel(it.msgModel!!.id,it.msgModel!!.MessageName,it.typeTitle,it.msgModel!!.new_msgs,it.msgModel!!.ID_Type_id)
+////            fav.createdAt=currentTime
+//            // check if item is favorite or not
+//            if (it.msgModel!!.is_fav){
+//                viewModel.update_fav(it.msgModel!!.id,false) // update favorite item state
+//                viewModel.delete_fav(fav) //delete item from db
+//                Toast.makeText(requireContext(),"تم الحذف من المفضلة",Toast.LENGTH_SHORT).show()
+//                setUpRv()
+//                msgsAdapter.notifyDataSetChanged()
+//
+//            }else{
+//                viewModel.update_fav(it.msgModel!!.id,true)
+//                viewModel.add_fav(fav) // add item to db
+//                Toast.makeText(requireContext(),"تم الاضافة الى المفضلة",Toast.LENGTH_SHORT).show()
+//                setUpRv()
+//                msgsAdapter.notifyDataSetChanged()
+//            }
+//
 //        }
-
-
-        viewModel.getMsgsFromRoom_by_id(argsId,requireContext()).observe(viewLifecycleOwner) { listShows ->
-            //  msgsAdapter.stateRestorationPolicy=RecyclerView.Adapter.StateRestorationPolicy.ALLOW
-            msgsAdapter.stateRestorationPolicy= RecyclerView.Adapter.StateRestorationPolicy.ALLOW
+//
+////        msgsAdapter.onClick={popupMenus(requireView())}
+//
+//    }
+//    private  fun setUpRv() = viewModel.viewModelScope.launch {
+//
+////        binding.rcMsgTypes.apply {
+////            adapter = msgstypesAdapter
+////            setHasFixedSize(true)
+////        }
+//
+//
+//        viewModel.getMsgsFromRoom_by_id(argsId,requireContext()).observe(viewLifecycleOwner) { listShows ->
+//            //  msgsAdapter.stateRestorationPolicy=RecyclerView.Adapter.StateRestorationPolicy.ALLOW
+//            msgsAdapter.stateRestorationPolicy= RecyclerView.Adapter.StateRestorationPolicy.ALLOW
+////            msgsAdapter.msgsModel = listShows
+////            binding.rcMsgs.adapter = msgsAdapter
 //            msgsAdapter.msgsModel = listShows
-//            binding.rcMsgs.adapter = msgsAdapter
-            msgsAdapter.msgsModel = listShows
-            if(binding.rcMsgs.adapter == null){
-                binding.rcMsgs.layoutManager = LinearLayoutManager(requireContext())
-                binding.rcMsgs.adapter = msgsAdapter
-                msgsAdapter.notifyDataSetChanged()
-            }else{
-                msgsAdapter.notifyDataSetChanged()
-            }
-            Log.e("tessst","enter111")
-
-        }
-    }
+//            if(binding.rcMsgs.adapter == null){
+//                binding.rcMsgs.layoutManager = LinearLayoutManager(requireContext())
+//                binding.rcMsgs.adapter = msgsAdapter
+//                msgsAdapter.notifyDataSetChanged()
+//            }else{
+//                msgsAdapter.notifyDataSetChanged()
+//            }
+//            Log.e("tessst","enter111")
+//
+//        }
+//    }
 
 
 

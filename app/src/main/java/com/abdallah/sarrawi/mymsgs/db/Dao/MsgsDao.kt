@@ -1,6 +1,7 @@
 package com.abdallah.sarrawi.mymsgs.db.Dao
 
 import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 
@@ -17,11 +18,17 @@ interface MsgsDao {
 
 
 
-    @Query("Select * from msgs_table where ID_Type_id =:ID_Type_id")
+    @Query("Select * from msgs_table where ID_Type_id =:ID_Type_id order by id desc")
     suspend fun getAllMsgsDao(ID_Type_id: Int): List<MsgsModel>
+
+    @Query("Select * from msgs_table where ID_Type_id =:ID_Type_id order by id desc")
+    fun getAllMsgsDaopa(ID_Type_id: Int): PagingSource<Int, MsgsModel>
 
     @Query("select e.*, c.MsgTypes as typeTitle from  msgs_table e left join msgs_types_table c  on  c.id = e.ID_Type_id where e.ID_Type_id=:ID_Type_id order by id DESC")
     suspend fun getAllMsgsDaoWithTitle(ID_Type_id: Int): List<MsgModelWithTitle>
+
+    @Query("select e.*, c.MsgTypes as typeTitle from  msgs_table e left join msgs_types_table c  on  c.id = e.ID_Type_id where e.ID_Type_id=:ID_Type_id order by id DESC")
+    fun getAllMsgsDaoWithTitle2(ID_Type_id: Int): PagingSource<Int,MsgModelWithTitle>
 
     @Query("SELECT e.*, c.MsgTypes AS typeTitle " +
             "FROM msgs_table e " +

@@ -56,11 +56,11 @@ class MsgsTypesViewModel constructor(
                     MsgsViewModel(msgsRepo).getAllMsgs(i.id)
                 }
 
-                context.hideprogressdialog()
+//                context.hideprogressdialog()
 
             } else {
 
-                context.hideprogressdialog()
+//                context.hideprogressdialog()
 
                 Log.i("TestRoom", "getAllMsgsTypes: data corrupted")
                 Log.d("tag", "getAll Error: ${response.code()}")
@@ -157,11 +157,11 @@ class MsgsTypesViewModel constructor(
         viewModelScope.launch {
             Log.i("TestRoom", "refreesh")
             if (internetCheck(context)) {
-                context.showprogressdialog()
+//                context.showprogressdialog()
                 //  context.hideprogressdialog()
                 getAllMsgsTypes(context)
             } else {
-                    context.hideprogressdialog()
+//                    context.hideprogressdialog()
 
                 Toast.makeText(
                     context,

@@ -3,10 +3,12 @@ package com.abdallah.sarrawi.mymsgs.db
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
 import com.abdallah.sarrawi.mymsgs.db.Dao.FavoriteDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsDao
 import com.abdallah.sarrawi.mymsgs.db.Dao.MsgsTypesDao
 import com.abdallah.sarrawi.mymsgs.models.*
+import kotlinx.coroutines.flow.Flow
 
 class LocaleSource(context: Context) {
 
@@ -86,5 +88,34 @@ class LocaleSource(context: Context) {
     suspend fun update_fav(id: Int,state:Boolean) {
         Msgs_Dao?.update_fav(id,state)!!
     }
+
+    //////////////////////////////
+    //paging
+
+    suspend fun getAllMsgslo(): PagingSource<Int, MsgsModel> {
+        return Msgs_Dao!!.getAllMsgsDaopa(ID_Type_id!!)
+    }
+
+    suspend fun insertFavoriteMsgs(favoriteModel:FavoriteModel){
+        return FavoriteDao!!.add_fav(favoriteModel)
+    }
+
+    suspend fun deleteFavoriteMsgs(favoriteModel:FavoriteModel){
+        return FavoriteDao!!.deletefav(favoriteModel)
+    }
+
+
+    //    suspend fun getAllFavoriteImages(): PagingSource<Int, FavImgModel>{
+    suspend fun getAllFavoriteLoPa(): PagingSource<Int, FavoriteModel>{
+        return FavoriteDao!!.getAllFavpa()
+    }
+
+
+
+    suspend fun update_favMsg(ID:Int,state:Boolean){
+        return Msgs_Dao!!.update_fav(ID,state)
+    }
+
+
 
 }

@@ -8,7 +8,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -21,24 +24,40 @@ import com.abdallah.sarrawi.mymsgs.ViewModel.MyViewModelFactory
 import com.abdallah.sarrawi.mymsgs.api.ApiService
 import com.abdallah.sarrawi.mymsgs.databinding.ActivityMainBinding
 import com.abdallah.sarrawi.mymsgs.db.LocaleSource
+import com.abdallah.sarrawi.mymsgs.db.PostDatabase
 import com.abdallah.sarrawi.mymsgs.repository.MsgsRepo
 import com.abdallah.sarrawi.mymsgs.repository.MsgsTypesRepo
+import com.abdallah.sarrawi.mymsgs.vm.*
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 
+
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var bottomNav : BottomNavigationView
     private lateinit var binding: ActivityMainBinding
-    lateinit var viewModel: MsgsTypesViewModel
-    lateinit var viewModel2: MsgsViewModel
+//    lateinit var viewModel: MsgsTypesViewModel
+//    lateinit var viewModel2: MsgsViewModel
     var mInterstitialAd: InterstitialAd? = null
     private lateinit var navController: NavController
     var mprogressdaialog: Dialog? = null
     var fragment = 1
+
+    private val ID_Type_id=0
+    private val retrofitService = ApiService.provideRetrofitInstance()
+    private val mainRepository3 by lazy { Repo_Type(retrofitService, LocaleSource(this),
+        PostDatabase.getInstance(this)) }
+    private val vm_types: VM_Type by viewModels {
+        MyVMFactoryTypes(mainRepository3, this, PostDatabase.getInstance(this))
+    }
+
+    // أخذ أو إنشاء VM_Msgs
+    private val vm_msgs: VM_Msgs by viewModels {
+        MyVMFactory(mainRepository3, this, PostDatabase.getInstance(this), ID_Type_id)
+    }
 //س
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,19 +85,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val retrofitService = ApiService.provideRetrofitInstance()
-        val mainRepository = MsgsTypesRepo(retrofitService, LocaleSource(this))
-        val mainRepository2 = MsgsRepo(retrofitService, LocaleSource(this))
-        //  supportActionBar?.hide()
-
-        viewModel =
-            ViewModelProvider(this, MyViewModelFactory(mainRepository, mainRepository2, this)).get(
-                MsgsTypesViewModel::class.java
-            )
-        viewModel2 =
-            ViewModelProvider(this, MyViewModelFactory(mainRepository, mainRepository2, this)).get(
-                MsgsViewModel::class.java
-            )
+//        val retrofitService = ApiService.provideRetrofitInstance()
+//        val mainRepository = MsgsTypesRepo(retrofitService, LocaleSource(this))
+//        val mainRepository2 = MsgsRepo(retrofitService, LocaleSource(this))
+//        //  supportActionBar?.hide()
+//
+//        viewModel =
+//            ViewModelProvider(this, MyViewModelFactory(mainRepository, mainRepository2, this)).get(
+//                MsgsTypesViewModel::class.java
+//            )
+//        viewModel2 =
+//            ViewModelProvider(this, MyViewModelFactory(mainRepository, mainRepository2, this)).get(
+//                MsgsViewModel::class.java
+//            )
 
 
     FirebaseMessaging.getInstance().subscribeToTopic("alert")
@@ -112,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_refresh -> {
 
-                viewModel.refreshPosts(this)
+//                viewModel.refreshPosts(this)
 
                 true
             }
@@ -146,75 +165,75 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun showprogressdialog() {
-
-        binding.progressBar.visibility = View.VISIBLE
-        binding.tvLoad?.visibility  = View.VISIBLE
-
-
-        //  mprogressdaialog = Dialog(this)
-        //  mprogressdaialog!!.setCancelable(false)
-        //  mprogressdaialog!!.setContentView(R.layout.progress_dialog)
-
-        //  mprogressdaialog!!.show()
-    }
-
-    fun hideprogressdialog() {
-        Log.e("tesssst","entred")
-        //  recreate()
-        // mprogressdaialog!!.dismiss()
-        binding.progressBar.visibility = View.GONE
-        binding.tvLoad?.visibility = View.GONE
-
-        if (mInterstitialAd != null) {
-            mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
-                override fun onAdDismissedFullScreenContent() {
-                    Log.d(TAG, "Ad was dismissed.")
-                    // Load the next interstitial ad.
-                    loadInterstitialAd()
-                }
-
-                override fun onAdFailedToShowFullScreenContent(p0: AdError) {
-                    Log.d(TAG, "Ad failed to show.")
-                    // Load the next interstitial ad.
-                    loadInterstitialAd()
-                }
-
-                override fun onAdShowedFullScreenContent() {
-                    Log.d(TAG, "Ad showed fullscreen content.")
-                    mInterstitialAd = null
-                }
-            }
-            mInterstitialAd?.show(this)
-        } else {
-            Log.d(TAG, "Ad wasn't loaded.")
-            // Load the next interstitial ad.
-            loadInterstitialAd()
-        }
-
-        mInterstitialAd?.show(this)
-
-
-        recreate()
-
-    }
-
-
-    override fun onDestroy() {
-        if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
-        super.onDestroy()
-    }
-
-    override fun onStop() {
-        //  if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
-        super.onStop()
-    }
-
-    override fun onDetachedFromWindow() {
-        //  if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
-
-        super.onDetachedFromWindow()
-    }
+//    fun showprogressdialog() {
+//
+//        binding.progressBar.visibility = View.VISIBLE
+//        binding.tvLoad?.visibility  = View.VISIBLE
+//
+//
+//        //  mprogressdaialog = Dialog(this)
+//        //  mprogressdaialog!!.setCancelable(false)
+//        //  mprogressdaialog!!.setContentView(R.layout.progress_dialog)
+//
+//        //  mprogressdaialog!!.show()
+//    }
+//
+//    fun hideprogressdialog() {
+//        Log.e("tesssst","entred")
+//        //  recreate()
+//        // mprogressdaialog!!.dismiss()
+////        binding.progressBar.visibility = View.GONE
+////        binding.tvLoad?.visibility = View.GONE
+//
+//        if (mInterstitialAd != null) {
+//            mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
+//                override fun onAdDismissedFullScreenContent() {
+//                    Log.d(TAG, "Ad was dismissed.")
+//                    // Load the next interstitial ad.
+//                    loadInterstitialAd()
+//                }
+//
+//                override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+//                    Log.d(TAG, "Ad failed to show.")
+//                    // Load the next interstitial ad.
+//                    loadInterstitialAd()
+//                }
+//
+//                override fun onAdShowedFullScreenContent() {
+//                    Log.d(TAG, "Ad showed fullscreen content.")
+//                    mInterstitialAd = null
+//                }
+//            }
+//            mInterstitialAd?.show(this)
+//        } else {
+//            Log.d(TAG, "Ad wasn't loaded.")
+//            // Load the next interstitial ad.
+//            loadInterstitialAd()
+//        }
+//
+//        mInterstitialAd?.show(this)
+//
+//
+//        recreate()
+//
+//    }
+//
+//
+//    override fun onDestroy() {
+//        if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
+//        super.onDestroy()
+//    }
+//
+//    override fun onStop() {
+//        //  if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
+//        super.onStop()
+//    }
+//
+//    override fun onDetachedFromWindow() {
+//        //  if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
+//
+//        super.onDetachedFromWindow()
+//    }
 
 
 
