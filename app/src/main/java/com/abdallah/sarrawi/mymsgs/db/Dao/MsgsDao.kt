@@ -37,6 +37,13 @@ interface MsgsDao {
             "ORDER BY e.id DESC")
     fun getAllNewMsg(): LiveData<List<MsgModelWithTitle>>
 
+    @Query("SELECT e.*, c.MsgTypes AS typeTitle " +
+            "FROM msgs_table e " +
+            "LEFT JOIN msgs_types_table c ON c.id = e.ID_Type_id " +
+            "WHERE e.new_msgs = 1 " +
+            "ORDER BY e.id DESC")
+    fun getAllNewMsg2(): PagingSource<Int,MsgModelWithTitle>
+
 
     @Query("delete from msgs_table")
     fun deleteAllmessage()

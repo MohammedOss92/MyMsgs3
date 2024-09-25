@@ -133,8 +133,113 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
         }
     }
 
-
     suspend fun refreshMsgswithID(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
+        var page = 1
+        val allMsgs = mutableListOf<MsgsModel>() // قائمة لتجميع جميع الرسائل من كل الصفحات
+        var isLastPage = false
+
+        try {
+            do {
+                Log.d("API Debug", "Fetching messages for ID_Type_id: $ID_Type_id, page: $page")
+                val response = apiService.getMsgs_Ser2(ID_Type_id, page)
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    val msgList = responseBody?.results?.MsgsModel ?: emptyList()
+
+                    if (msgList.isNotEmpty()) {
+                        Log.d("API Debug", "Fetched ${msgList.size} messages for ID_Type_id: $ID_Type_id, page: $page")
+                        allMsgs.addAll(msgList) // أضف جميع الرسائل إلى القائمة
+                        page++ // الانتقال إلى الصفحة التالية
+                    } else {
+                        Log.d("API Info", "No more messages found for ID_Type_id: $ID_Type_id on page: $page")
+                        isLastPage = true // الصفحة فارغة، اعتبرها الأخيرة
+                    }
+                } else {
+                    // التعامل مع الأخطاء المحتملة في الرد من الـ API
+                    when (response.code()) {
+                        404 -> {
+                            Log.e("API Error", "Page $page not found for ID_Type_id: $ID_Type_id, stopping fetch.")
+                            isLastPage = true // إذا كانت الصفحة غير موجودة، أوقف التكرار
+                        }
+                        else -> {
+                            Log.e("API Error", "Failed to fetch messages: ${response.errorBody()?.string() ?: "Unknown error"} for ID_Type_id: $ID_Type_id, page: $page")
+                            isLastPage = true // توقف التكرار عند حدوث خطأ
+                        }
+                    }
+                }
+            } while (!isLastPage)
+
+            if (allMsgs.isNotEmpty()) {
+                // إدخال جميع الرسائل في قاعدة البيانات دفعة واحدة بعد الجلب
+                Log.d("API Debug", "Inserting all ${allMsgs.size} messages into the database for ID_Type_id: $ID_Type_id")
+                database.msgsDao().insert_msgs(allMsgs)
+            } else {
+                Log.d("API Info", "No messages to insert into the database for ID_Type_id: $ID_Type_id")
+            }
+        } catch (e: IOException) {
+            Log.e("Network Error", "Network error occurred: ${e.message}")
+            // عرض رسالة للمستخدم توضح أن هناك مشكلة في الشبكة
+            throw IOException("Network error", e)
+        } catch (e: HttpException) {
+            Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
+            // عرض رسالة للمستخدم توضح أن هناك مشكلة في الرد من الخادم
+        } catch (e: Exception) {
+            Log.e("General Error", "An unexpected error occurred: ${e.message}")
+            // معالجة الأخطاء العامة لمنع تعطل التطبيق
+        }
+    }
+
+
+    suspend fun refreshMsgswithID3(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
+        var page = 1 // البدء بالصفحة الأولى
+        var msgList: List<MsgsModel>
+        var isLastPage = false // متغير للتحقق مما إذا كانت الصفحة الأخيرة
+
+        try {
+            do {
+                Log.d("API Debug", "Fetching messages for ID_Type_id: $ID_Type_id, page: $page")
+                val response = apiService.getMsgs_Ser2(ID_Type_id, page)
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()
+                    msgList = responseBody?.results?.MsgsModel ?: emptyList()
+
+                    if (msgList.isNotEmpty()) {
+                        Log.d("API Debug", "Inserting ${msgList.size} messages into database for ID_Type_id: $ID_Type_id, page: $page")
+                        database.msgsDao().insert_msgs(msgList)
+                        page++ // الانتقال إلى الصفحة التالية فقط إذا كانت البيانات موجودة
+                    } else {
+                        Log.d("API Info", "No more messages found for ID_Type_id: $ID_Type_id on page: $page")
+                        isLastPage = true // إذا كانت القائمة فارغة، اعتبر أنها الصفحة الأخيرة
+                    }
+                } else {
+                    // التحقق من حالة الخطأ
+                    when (response.code()) {
+                        404 -> {
+                            Log.e("API Error", "Invalid page: $page for ID_Type_id: $ID_Type_id, stopping fetch.")
+                            isLastPage = true // توقف إذا كانت الصفحة غير موجودة
+                        }
+                        else -> {
+                            Log.e("API Error", "Failed to fetch messages: ${response.errorBody()?.string() ?: "Unknown error"} for ID_Type_id: $ID_Type_id, page: $page")
+                            isLastPage = true // يمكنك اختيار إيقاف التكرار في حالة الخطأ
+                        }
+                    }
+                }
+            } while (!isLastPage) // استمر في التكرار حتى يتم كسر الحلقة عند الصفحة الأخيرة
+        } catch (e: IOException) {
+            Log.e("Network Error", "Network error occurred: ${e.message}")
+            throw IOException("Network error", e)
+        } catch (e: HttpException) {
+            Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("General Error", "An unexpected error occurred: ${e.message}")
+        }
+    }
+
+
+
+    suspend fun refreshMsgswithID2(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
         var page = 1 // البدء بالصفحة الأولى
 
         try {
@@ -220,5 +325,11 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
 
     private val _itemss = MutableStateFlow<PagingData<MsgsModel>>(PagingData.empty())
     val itemsss: StateFlow<PagingData<MsgsModel>> = _itemss.asStateFlow()
+
+    //////////////////////////
+    //new
+    fun getAllMsgsNew():LiveData<PagingData<MsgModelWithTitle>>{
+        return repo_type.getAllMsgsNew()
+    }
 
 }

@@ -76,4 +76,15 @@ class Repo_Type constructor(val apiService: ApiService, private val localeSource
             pagingSourceFactory = { MsgsPaging(apiService,ID_Type_id) }
         ).liveData
     }
+
+    fun getAllMsgsNew():LiveData<PagingData<MsgModelWithTitle>>{
+
+        return  Pager(
+            config = PagingConfig(pageSize = 12,
+                enablePlaceholders =  false
+            ),
+
+            pagingSourceFactory = { database.msgsDao().getAllNewMsg2() }
+        ).liveData
+    }
 }
