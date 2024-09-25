@@ -84,7 +84,7 @@ class NewMsgsFragment : Fragment(), CallBack {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpRv()
-        adapterOnClick()
+//        adapterOnClick()
         menu_item()
 
     }
@@ -103,6 +103,46 @@ class NewMsgsFragment : Fragment(), CallBack {
         vm_msgs.getAllMsgsNew().observe(viewLifecycleOwner) { pagingData ->
             // تحديث القائمة بعد تغيير حالة العنصر المفضل
             pagingAdapter.submitData(lifecycle, pagingData)
+        }
+
+        pagingAdapter.onItemClick = { id, item, position ->
+            clickCount++
+            if (clickCount >= 2) {
+// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
+//                    if (mInterstitialAd != null) {
+//                        mInterstitialAd?.show(requireActivity())
+//                        loadInterstitialAd()
+//                    } else {
+//                        Log.d("TAG", "The interstitial ad wasn't ready yet.")
+//                    }
+                clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
+
+            }
+
+            val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+                Date()
+            )
+            val fav = FavoriteModel(item.msgModel!!.id,item.msgModel!!.MessageName,item.msgModel!!.MessageName,item.msgModel!!.ID_Type_id,item.msgModel!!.ID_Type_id).apply {
+                createdAt = currentTime
+            }
+
+            if (item.msgModel!!.is_fav) {
+                vm_msgs.update_favs(item.msgModel!!.id, false)
+                vm_msgs.delete_favs(fav)
+                lifecycleScope.launch {
+                    val snackbar = Snackbar.make(requireView(), "تم الحذف من المفضلة", Snackbar.LENGTH_SHORT)
+                    snackbar.show()
+                    pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                }
+            } else {
+                vm_msgs.update_favs(item.msgModel!!.id, true)
+                vm_msgs.add_favs(fav)
+                lifecycleScope.launch {
+                    val snackbar = Snackbar.make(requireView(), "تم الاضافة الى المفضلة", Snackbar.LENGTH_SHORT)
+                    snackbar.show()
+                    pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                }
+            }
         }
     }
 

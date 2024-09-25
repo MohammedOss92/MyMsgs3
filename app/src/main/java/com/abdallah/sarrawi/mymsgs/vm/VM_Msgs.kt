@@ -26,6 +26,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+
+
 
 class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val database: PostDatabase): ViewModel()  {
 
@@ -60,43 +67,56 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
 
     private val retrofitService = ApiService.provideRetrofitInstance()
 
+
+
     suspend fun refreshMsgsType2(apiService: ApiService, database: PostDatabase, view: View) {
         if (internetCheck(context)) {
-            var page = 1 // البدء بالصفحة الأولى
-            var msgsTypesList: List<MsgsTypesModel>
+            CoroutineScope(Dispatchers.IO).launch {
+                var page = 1
+                var msgsTypesList: List<MsgsTypesModel>
+                var retryCount = 0
 
-            try {
-                do {
-                    val response = apiService.getMsgsTypes_Ser2(page)
-                    if (response.isSuccessful) {
-                        msgsTypesList = response.body()?.results ?.MsgsTypesModel?: emptyList() // تأكد من وجود البيانات
-                        if (msgsTypesList.isNotEmpty()) {
-                            database.typesDao().insertPosts(msgsTypesList)
-                            page++
-                            for (nokatType in msgsTypesList) {
-                                refreshMsgswithID(apiService, database, nokatType.id)
+                try {
+                    do {
+                        Log.d("API Debug", "Fetching msgs types for page: $page")
+                        val response = apiService.getMsgsTypes_Ser2(page)
+                        if (response.isSuccessful) {
+                            msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
+                            if (msgsTypesList.isNotEmpty()) {
+                                withContext(Dispatchers.IO) {
+                                    database.typesDao().insertPosts(msgsTypesList)
+                                }
+                                page++
+
+                                for (nokatType in msgsTypesList) {
+                                    refreshMsgswithID(apiService, database, nokatType.id)
+                                }
+
+                                retryCount = 0
+                            } else {
+                                break
                             }
                         } else {
-                            break // أوقف التكرار إذا لم يكن هناك بيانات
+                            Log.e("API Error", response.errorBody()?.string() ?: "Unknown error")
+                            msgsTypesList = emptyList()
                         }
-                    } else {
-                        // تسجيل الخطأ إذا لم تكن الاستجابة ناجحة
-                        Log.e("API Error", response.errorBody()?.string() ?: "Unknown error")
-                        msgsTypesList = emptyList() // تعيين القائمة كفارغة لإيقاف التكرار
-                    }
-                } while (msgsTypesList.isNotEmpty())
-            } catch (e: IOException) {
-                throw IOException("Network error", e)
-            } catch (e: HttpException) {
-                // تسجيل الأخطاء أو معالجتها إذا لزم الأمر
-                Log.e("HTTP Error", e.message ?: "Unknown error")
+
+                        delay(500)
+
+                    } while (msgsTypesList.isNotEmpty() && retryCount < 3)
+                } catch (e: IOException) {
+                    Log.e("Network Error", "Network error occurred: ${e.message}")
+                    throw e
+                } catch (e: HttpException) {
+                    Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
+                }
             }
         } else {
-            // عرض رسالة إذا لم يكن هناك اتصال بالإنترنت
-            val snackbar = Snackbar.make(view, "يرجى التحقق من اتصالك بالإنترنت..", Snackbar.LENGTH_SHORT)
-            snackbar.show()
+            Snackbar.make(view, "يرجى التحقق من اتصالك بالإنترنت..", Snackbar.LENGTH_SHORT).show()
         }
     }
+
+
     suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
         if (internetCheck(context)) {
             var page = 1 // البدء بالصفحة الأولى
