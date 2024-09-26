@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -33,6 +36,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -130,9 +134,21 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_refresh -> {
+                val handler = Handler(Looper.getMainLooper())
 
+                lifecycleScope.launch {
+                    try {
+                        // استخدم this@MainActivity للحصول على السياق
+                        vm_msgs.refreshMsgsType(
+                            ApiService.provideRetrofitInstance(),
+                            PostDatabase.getInstance(this@MainActivity), // استخدام this@MainActivity للحصول على السياق
+                            findViewById(android.R.id.content) // استخدم findViewById إذا كنت تحتاج إلى View
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
 //                viewModel.refreshPosts(this)
-
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

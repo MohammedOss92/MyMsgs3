@@ -202,10 +202,7 @@ class FirstFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
 
                 when(menuItem.itemId){
-                    R.id.action_refresh -> {
-//                        viewModel.refreshPosts(requireActivity() as MainActivity)
-                        startRefreshing()
-                    }
+
 
                     R.id.action_theme -> {
 
@@ -229,36 +226,7 @@ class FirstFragment : Fragment() {
         },viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-//    fun showprogressdialog() {
-//
-//        binding.progressBar.visibility = View.VISIBLE
-//        binding.textView.visibility = View.VISIBLE
-//        //  mprogressdaialog = Dialog(this)
-//        //  mprogressdaialog!!.setCancelable(false)
-//        //  mprogressdaialog!!.setContentView(R.layout.progress_dialog)
-//
-//        //  mprogressdaialog!!.show()
-//    }
-//
-//    fun hideprogressdialog() {
-//        Log.e("tesssst","entred")
-//        //  recreate()
-//        // mprogressdaialog!!.dismiss()
-//        binding.progressBar.visibility = View.GONE
-//        binding.textView.visibility = View.GONE
-////        recreate()
-//
-//    }
-//
-//    override fun onDestroy() {
-//        if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
-//        super.onDestroy()
-//    }
-//
-//    override fun onStop() {
-//        //  if (mprogressdaialog != null && mprogressdaialog!!.isShowing) mprogressdaialog!!.dismiss()
-//        super.onStop()
-//    }
+
 
 
    fun InterstitialAd_fun (){
