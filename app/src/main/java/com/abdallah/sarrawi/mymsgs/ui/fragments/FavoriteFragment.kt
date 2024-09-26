@@ -12,6 +12,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
+import androidx.paging.filter
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.abdallah.sarrawi.mymsgs.R
@@ -24,10 +26,14 @@ import com.abdallah.sarrawi.mymsgs.adapter.Msgs_Fav_Adapter
 import com.abdallah.sarrawi.mymsgs.api.ApiService
 import com.abdallah.sarrawi.mymsgs.databinding.FragmentFavoriteBinding
 import com.abdallah.sarrawi.mymsgs.db.LocaleSource
+import com.abdallah.sarrawi.mymsgs.db.PostDatabase
 import com.abdallah.sarrawi.mymsgs.models.FavoriteModel
+import com.abdallah.sarrawi.mymsgs.paging.MsgsAdapterFavPaging
 import com.abdallah.sarrawi.mymsgs.repository.MsgsRepo
 import com.abdallah.sarrawi.mymsgs.repository.MsgsTypesRepo
 import com.abdallah.sarrawi.mymsgs.ui.MainActivity
+import com.abdallah.sarrawi.mymsgs.vm.*
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class FavoriteFragment : Fragment() {
@@ -35,15 +41,29 @@ class FavoriteFragment : Fragment() {
     private lateinit var _binding: FragmentFavoriteBinding
     private val binding get() = _binding!!
 
-    lateinit var msgfavadapter :Msgs_Fav_Adapter
-
+//    lateinit var msgfavadapter :Msgs_Fav_Adapter
+//
+//    private val retrofitService = ApiService.provideRetrofitInstance()
+//
+//    private val mainRepository by lazy { MsgsRepo(retrofitService, LocaleSource(requireContext())) }
+//
+//    private val viewModel: MsgsViewModel by viewModels {
+//        ViewModelFactory(mainRepository)
+//    }
+//
+    lateinit var msgsAdapterFavPaging: MsgsAdapterFavPaging
     private val retrofitService = ApiService.provideRetrofitInstance()
-
-    private val mainRepository by lazy { MsgsRepo(retrofitService, LocaleSource(requireContext())) }
-
-    private val viewModel: MsgsViewModel by viewModels {
-        ViewModelFactory(mainRepository)
+    private val mainRepository3 by lazy { Repo_Type(retrofitService, LocaleSource(requireContext()),
+        PostDatabase.getInstance(requireContext())) }
+    private val vm_types: VM_Type by viewModels {
+        MyVMFactoryTypes(mainRepository3, requireContext(), PostDatabase.getInstance(requireContext()))
     }
+    private var ID_Type_id=0
+    // أخذ أو إنشاء VM_Msgs
+    private val vm_msgs: VM_Msgs by viewModels {
+        MyVMFactory(mainRepository3, requireContext(), PostDatabase.getInstance(requireContext()), ID_Type_id)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,7 +72,8 @@ class FavoriteFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
         (activity as MainActivity).fragment = 1
-        msgfavadapter = Msgs_Fav_Adapter(requireContext(),this /*,this*/ )
+//        msgfavadapter = Msgs_Fav_Adapter(requireContext(),this /*,this*/ )
+        msgsAdapterFavPaging = MsgsAdapterFavPaging(requireContext(),this /*,this*/ )
 
         menu_item()
         setUpRv()
@@ -68,11 +89,21 @@ class FavoriteFragment : Fragment() {
 
     private fun adapterOnClick() {
 
-        msgfavadapter.onItemClick = {
-            viewModel.viewModelScope.launch {
-                viewModel.update_fav(it.id,false) // update item state
-                val result = mainRepository.deleteFav(it)   // delete favorite item from db
-                Toast.makeText(requireContext(),"تم الحذف من المفضلة",Toast.LENGTH_SHORT).show()
+//        msgfavadapter.onItemClick = {
+//            viewModel.viewModelScope.launch {
+//                viewModel.update_fav(it.id,false) // update item state
+//                val result = mainRepository.deleteFav(it)   // delete favorite item from db
+//                Toast.makeText(requireContext(),"تم الحذف من المفضلة",Toast.LENGTH_SHORT).show()
+//                setUpRv()
+//            }
+//
+//        }
+        msgsAdapterFavPaging.onItemClick = {
+            vm_msgs.viewModelScope.launch {
+                vm_msgs.update_fav(it.id,false) // update item state
+                val result = mainRepository3.deleteFav(it)   // delete favorite item from db
+                val snackbar = Snackbar.make(requireView(), "تم الحذف من المفضلة", Snackbar.LENGTH_SHORT)
+                snackbar.show()
                 setUpRv()
             }
 
@@ -104,28 +135,48 @@ class FavoriteFragment : Fragment() {
 
 
     @SuppressLint("SuspiciousIndentation")
-    private fun setUpRv() = viewModel.viewModelScope.launch {
-        viewModel.getFav().observe(viewLifecycleOwner) { listShows ->
-            val updatedListShows = if (listShows.isEmpty()) {
-                // إنشاء قائمة جديدة تحتوي على العنصر المطلوب في حالة القائمة الفارغة
-                listShows + FavoriteModel(0, "مرحبا", "مسجات اسلامية", 0, 1)
-            } else {
-                // تحديث القائمة مباشرة في حالة عدم فراغها
-                listShows.filter { it.MessageName != "مرحبا" }
+    private fun setUpRv() = vm_msgs.viewModelScope.launch {
+        // مراقبة البيانات القادمة من الـ ViewModel
+        vm_msgs.favMsgs.observe(viewLifecycleOwner) { pagingData ->
+
+//            // تحقق إذا كانت القائمة الحالية فارغة، إذا كانت كذلك، أضف عنصرًا جديدًا
+//            val updatedListShows = if (listShows.isEmpty()) {
+//                // إنشاء قائمة جديدة تحتوي على عنصر معين في حالة أن القائمة فارغة
+//                listShows + FavoriteModel(0, "مرحبا", "مسجات اسلامية", 0, 1)
+//            } else {
+//                // إذا كانت القائمة غير فارغة، قم بتصفية العناصر التي لا تحتوي على "مرحبا"
+//                listShows.filter { it.MessageName != "مرحبا" }
+//            }
+            val updatedPagingData = pagingData.map { favoriteModel ->
+                // تحقق إذا كانت البيانات تحتوي على "مرحبا" واستبدلها أو قم بتعديل البيانات
+                if (favoriteModel.MessageName != "مرحبا") {
+                    favoriteModel
+                } else {
+                    // استبدال العنصر عند وجود "مرحبا"
+                    FavoriteModel(0, "مرحبا", "مسجات اسلامية", 0, 1)
+                }
             }
 
-            msgfavadapter.stateRestorationPolicy =
-                RecyclerView.Adapter.StateRestorationPolicy.ALLOW
-            msgfavadapter.msgs_fav_list = updatedListShows
+            // تعيين سياسة استعادة حالة RecyclerView
+            msgsAdapterFavPaging.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
+
+            // تمرير البيانات إلى محول RecyclerView
+            msgsAdapterFavPaging.submitData(lifecycle, pagingData)
+
+            // إذا كان المحول غير معين مسبقًا، قم بتعيينه وإعداد التخطيط
             if (binding.rcMsgFav.adapter == null) {
                 binding.rcMsgFav.layoutManager = LinearLayoutManager(requireContext())
-                binding.rcMsgFav.adapter = msgfavadapter
+                binding.rcMsgFav.adapter = msgsAdapterFavPaging
             } else {
-                msgfavadapter.notifyDataSetChanged()
+                // إذا كان المحول معينًا بالفعل، قم بتحديث البيانات
+                msgsAdapterFavPaging.notifyDataSetChanged()
             }
+
+            // تسجيل الدخول لتتبع العملية
             Log.e("tessst", "enter111")
         }
     }
+
 
     private fun menu_item() {
         // The usage of an interface lets you inject your own implementation

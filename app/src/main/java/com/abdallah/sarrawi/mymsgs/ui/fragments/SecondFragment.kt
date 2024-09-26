@@ -144,7 +144,7 @@ class SecondFragment : Fragment() , CallBack {
                 }
 
                 val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-                val fav = FavoriteModel(item.msgModel!!.id,item.msgModel!!.MessageName,item.msgModel!!.MessageName,item.msgModel!!.ID_Type_id,item.msgModel!!.ID_Type_id).apply {
+                val fav = FavoriteModel(item.msgModel!!.id,item.msgModel!!.MessageName,item.typeTitle,item.msgModel!!.ID_Type_id,item.msgModel!!.ID_Type_id).apply {
                     createdAt = currentTime
                 }
 

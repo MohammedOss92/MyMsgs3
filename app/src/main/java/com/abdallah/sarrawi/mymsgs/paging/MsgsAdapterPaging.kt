@@ -41,7 +41,7 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
 
             fun bind(msgsModel: MsgModelWithTitle) {
                 binding.apply {
-//                tvTitle.text = nokatModel.NokatTypes
+                tvTitle.text = msgsModel.typeTitle
                     tvMsgM.text = msgsModel.msgModel!!.MessageName
                     newMsgM.setImageResource(R.drawable.new_msg)
                     newMsgM.visibility = if (msgsModel!!.msgModel!!.new_msgs == 0) View.INVISIBLE else View.VISIBLE
