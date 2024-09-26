@@ -17,7 +17,7 @@ import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 
 @Database(
     entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(LocalDateTimeConverter::class)
@@ -45,7 +45,15 @@ abstract class PostDatabase : RoomDatabase() {
                 "MsgsDb.db"
             )
                 .fallbackToDestructiveMigration()
+                .addMigrations(MIGRATION_1_2) // إضافة الهجرة هنا
+
                 .build()
+        }
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE msgs_table ADD COLUMN isBookmark INTEGER NOT NULL DEFAULT 0") // 0 هي القيمة الافتراضية
+            }
         }
 
     }

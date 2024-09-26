@@ -79,6 +79,14 @@
                 android:layout_toRightOf="@+id/new_Msg_m"
                 android:src="@drawable/ic_favorite"/>
 
+            <ImageButton
+                android:id="@+id/bookmark_btn"
+                android:layout_width="30dp"
+                android:layout_height="28dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/fav_btn"
+                android:src="@drawable/ic_bookmark_f"/>
+
 
             <ImageView
                 android:id="@+id/new_Msg_m"

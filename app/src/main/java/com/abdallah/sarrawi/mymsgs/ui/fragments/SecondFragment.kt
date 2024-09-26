@@ -26,6 +26,7 @@ import com.abdallah.sarrawi.mymsgs.db.LocaleSource
 import com.abdallah.sarrawi.mymsgs.db.PostDatabase
 import com.abdallah.sarrawi.mymsgs.models.FavoriteModel
 import com.abdallah.sarrawi.mymsgs.models.MsgModelWithTitle
+import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 import com.abdallah.sarrawi.mymsgs.paging.MsgsAdapterPaging
 import com.abdallah.sarrawi.mymsgs.paging.MsgsTypesAdapterPaging
 import com.abdallah.sarrawi.mymsgs.repository.MsgsRepo
@@ -57,7 +58,8 @@ class SecondFragment : Fragment() , CallBack {
 //        ViewModelFactory(mainRepository)
 //    }
 
-
+    var onBookmarkClick: ((MsgsModel) -> Unit)? = null
+    lateinit var msgsModel: MsgsModel
     private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this/*isDark*/) }
     private var ID_Type_id=0
     private val retrofitService = ApiService.provideRetrofitInstance()
@@ -166,6 +168,14 @@ class SecondFragment : Fragment() , CallBack {
                     }
                 }
             }
+            pagingAdapter.onItemClick2 = { bookmarkState, item, position ->
+                val newBookmarkState = if (item.msgModel!!.isBookmark == 0) 1 else 0
+                item.msgModel!!.isBookmark = newBookmarkState // تحديث الحالة محلياً
+                vm_msgs.setBookmarkForItem(item.msgModel!!) // تمرير العنصر إلى ViewModel لتحديثه في قاعدة البيانات
+            }
+
+
+
 
             pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }

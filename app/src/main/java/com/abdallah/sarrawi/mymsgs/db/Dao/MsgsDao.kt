@@ -2,11 +2,8 @@ package com.abdallah.sarrawi.mymsgs.db.Dao
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Insert
+import androidx.room.*
 
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
 import com.abdallah.sarrawi.mymsgs.models.MsgModelWithTitle
 import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 
@@ -51,4 +48,20 @@ interface MsgsDao {
     // update msg_table items favorite state
     @Query("Update msgs_table SET is_fav = :state where id =:ID")
     suspend fun update_fav(ID:Int,state:Boolean)
+    //////////////////////////////
+
+//    @Query("UPDATE msgs_table SET isBookmark = 0 WHERE isBookmark = 1")
+    @Query("UPDATE msgs_table SET isBookmark = 0 WHERE isBookmark = 1 AND ID_Type_id = :typeId")
+    suspend fun resetBookmarksInMsgs(typeId: Int)
+
+    @Update
+    suspend fun updateMsg(msg: MsgsModel)
+
+    @Transaction
+    suspend fun setBookmarkForMsg(newBookmark: MsgsModel) {
+        // إعادة تعيين جميع العناصر المؤشرة المرتبطة بنفس ID_Type_id
+        resetBookmarksInMsgs(newBookmark.ID_Type_id)
+        // تحديث العنصر الجديد ليكون مؤشراً عليه
+        updateMsg(newBookmark.copy(isBookmark = 1))
+    }
 }

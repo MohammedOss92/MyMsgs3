@@ -87,4 +87,10 @@ class Repo_Type constructor(val apiService: ApiService, private val localeSource
             pagingSourceFactory = { database.msgsDao().getAllNewMsg2() }
         ).liveData
     }
+
+    ///////////////////
+    //bookmark
+    suspend fun setBookmarkForItem(item: MsgsModel) {
+        database.msgsDao().setBookmarkForMsg(item)
+    }
 }

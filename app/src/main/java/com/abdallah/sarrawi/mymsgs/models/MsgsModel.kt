@@ -36,6 +36,9 @@ data class MsgsModel(
     var is_fav: Boolean = false,
 
     @ColumnInfo(name = "createdAt")
-    var createdAt: String? = null // قيمة افتراضية تكون null
+    var createdAt: String? = null, // قيمة افتراضية تكون null
+
+    @ColumnInfo("isBookmark") // إضافة اسم العمود هنا
+    var isBookmark: Int = 0, // القيمة الافتراضية ستكون 0
 
 )

@@ -26,7 +26,7 @@ import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragmentDirections
 
 class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter<MsgModelWithTitle, MsgsAdapterPaging.ViewHolder>(COMPARATOR) {
 
-        var onItemClick2: ((item:MsgsModel,position:Int) -> Unit)? = null
+        var onItemClick2: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
         var onItemClick: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
 
 
@@ -67,6 +67,25 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
                         }
                     }
 
+                }
+
+                binding.bookmarkBtn.setOnClickListener {
+                    val position = bindingAdapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        getItem(position)?.let { item ->
+                            onItemClick2?.invoke(item.msgModel!!.isBookmark ?: 0, item, position)
+                        }
+
+                    }
+                }
+                if(msgsModel.msgModel!!.isBookmark==1){
+
+                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_t)
+
+                }
+                else{
+
+                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_f)
                 }
 
             }

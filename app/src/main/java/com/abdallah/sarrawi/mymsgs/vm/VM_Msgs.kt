@@ -352,4 +352,12 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
         return repo_type.getAllMsgsNew()
     }
 
+    ////////////////////////
+    //bookmark
+    fun setBookmarkForItem(item: MsgsModel) {
+        viewModelScope.launch {
+            repo_type.setBookmarkForItem(item)
+        }
+    }
+
 }
