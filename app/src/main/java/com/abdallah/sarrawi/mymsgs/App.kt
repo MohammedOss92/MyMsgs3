@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatDelegate
-import com.abdallah.sarrawi.mymsgs.broadcastReceiver.RefreshPostsService
+
 import com.jakewharton.threetenabp.AndroidThreeTen
 
 class App : Application() {
@@ -17,6 +17,7 @@ class App : Application() {
          super.onCreate()
          ctx = applicationContext
          AndroidThreeTen.init(this)
+
          var sharedPref: SharedPref = SharedPref(this)
          IsDark=sharedPref.getThemeStatePref()
 
@@ -27,6 +28,11 @@ class App : Application() {
          else{
              AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
          }
+
+//         //يمكنك إنشاؤه في مستوى التطبيق لتشارك البيانات بين الأنشطة:
+//        val sharedViewModel: SharedViewModel by lazy {
+//            ViewModelProvider.AndroidViewModelFactory.getInstance(this).create(SharedViewModel::class.java)
+//        }
 
      }
 

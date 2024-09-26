@@ -12,6 +12,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.abdallah.sarrawi.mymsgs.R
 import com.abdallah.sarrawi.mymsgs.databinding.FragmentSplashBinding
 import java.text.SimpleDateFormat
@@ -37,6 +39,7 @@ class SplashFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
 //        val tvSplash:TextView =view.findViewById(R.id.mmm)
         val imgSplash:ImageView =view.findViewById(R.id.imageView)
