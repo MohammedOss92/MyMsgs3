@@ -3,6 +3,7 @@ package com.abdallah.sarrawi.mymsgs.paging
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
@@ -53,6 +54,12 @@ class MsgsTypesAdapterPaging (val con: Context, val frag: Fragment): PagingDataA
                 tvTitle.text = msgsTypeModel.msgTypes!!.MsgTypes
                 tvCounter.text = msgsTypeModel.subCount.toString()
                 tvnew.text = msgsTypeModel.newMsgsCount.toString()
+
+                if (msgsTypeModel.newMsgsCount == 0) {
+                    binding.tvnew.setVisibility(View.INVISIBLE)
+                } else {
+                    binding.tvnew.setVisibility(View.VISIBLE)
+                }
             }
 
         }
