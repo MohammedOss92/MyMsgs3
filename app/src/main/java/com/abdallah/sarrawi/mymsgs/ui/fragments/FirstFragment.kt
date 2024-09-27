@@ -101,10 +101,13 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        InterstitialAd_fun()
+
 //        setUpRv()
 //        adapterOnClick()
         setup()
+        adapterOnClick()
+        InterstitialAd_fun()
+        loadInterstitialAd()
         binding.swipeRefreshLayout.setOnRefreshListener {
             // بدء عملية التحديث
             startRefreshing()
@@ -114,30 +117,30 @@ class FirstFragment : Fragment() {
 
 
 
-//    private fun adapterOnClick(){
-//        //لاحظ الفانكشن انها بترمي الid
-////        msgstypesAdapter.onItemClick = {id, MsgTypes ->
-//        msgstypesAdapter.onItemClick = {id ->
-////            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
-////            val direction = FirstFragmentDirections.actionFirsFragmentToSecondFragment(id, MsgTypes)
-////            InterstitialAd_fun()
-//            clickCount++
-//            if (clickCount >= 4) {
-//// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
-//                if (mInterstitialAd != null) {
-//                    mInterstitialAd?.show(requireActivity())
-//                } else {
-//                    Log.d("TAG", "The interstitial ad wasn't ready yet.")
-//                }
-//                clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
-//
-//            }
-//
-//            val direction = FirstFragmentDirections.actionFirsFragmentToSecondFragment(id)
-//            findNavController().navigate(direction)
-//        }
-//
-//    }
+    private fun adapterOnClick(){
+        //لاحظ الفانكشن انها بترمي الid
+//        msgstypesAdapter.onItemClick = {id, MsgTypes ->
+        msgsTypesAdapterPaging.onItemClick = {id ->
+//            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
+//            val direction = FirstFragmentDirections.actionFirsFragmentToSecondFragment(id, MsgTypes)
+//            InterstitialAd_fun()
+            clickCount++
+            if (clickCount >= 2) {
+// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
+                if (mInterstitialAd != null) {
+                    mInterstitialAd?.show(requireActivity())
+                } else {
+                    Log.d("TAG", "The interstitial ad wasn't ready yet.")
+                }
+                clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
+
+            }
+
+            val direction = FirstFragmentDirections.actionFirsFragmentToSecondFragment(id)
+            findNavController().navigate(direction)
+        }
+
+    }
 
 
 
@@ -258,6 +261,31 @@ class FirstFragment : Fragment() {
            }
        )
    }
+    fun loadInterstitialAd() {
+        MobileAds.initialize(requireActivity()) { initializationStatus ->
+            // do nothing on initialization complete
+        }
+
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            requireActivity(),
+            "ca-app-pub-1895204889916566/9391166409",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    // The mInterstitialAd reference will be null until an ad is loaded.
+                    mInterstitialAd = interstitialAd
+                    Log.i("onAdLoadedL", "onAdLoaded")
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    // Handle the error
+                    Log.d("onAdLoadedF", loadAdError.toString())
+                    mInterstitialAd = null
+                }
+            }
+        )
+    }
 
     private fun startRefreshing() {
         // بدء عملية التحديث
@@ -283,6 +311,21 @@ class FirstFragment : Fragment() {
                     binding.swipeRefreshLayout.isRefreshing = false
                 }, 1000) // تأخير 5 ثوانٍ
             }
+        }
+    }
+
+    fun showInterstitial(){
+        clickCount++
+        if (clickCount >= 2) {
+// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
+            if (mInterstitialAd != null) {
+                mInterstitialAd?.show(requireActivity())
+                loadInterstitialAd()
+            } else {
+                Log.d("TAG", "The interstitial ad wasn't ready yet.")
+            }
+            clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
+
         }
     }
 

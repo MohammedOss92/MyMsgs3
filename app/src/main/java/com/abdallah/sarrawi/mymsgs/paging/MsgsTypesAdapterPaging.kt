@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.abdallah.sarrawi.mymsgs.databinding.MsgstypeslayoutBinding
 import com.abdallah.sarrawi.mymsgs.models.MsgsTypeWithCount
 import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
+import com.abdallah.sarrawi.mymsgs.ui.fragments.FirstFragment
 import com.abdallah.sarrawi.mymsgs.ui.fragments.FirstFragmentDirections
+import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragment
 
 class MsgsTypesAdapterPaging (val con: Context, val frag: Fragment): PagingDataAdapter<MsgsTypeWithCount, MsgsTypesAdapterPaging.ViewHolder>(COMPARATOR) {
 
@@ -41,6 +43,7 @@ class MsgsTypesAdapterPaging (val con: Context, val frag: Fragment): PagingDataA
                         // يمكنك استدعاء onItemClick إذا كنت بحاجة لذلك
 //                        onItemClick?.invoke(item.msgTypes!!.id)
                         onItemClick?.invoke(item.msgTypes!!.id)
+                        (frag as? FirstFragment)?.showInterstitial()
                     }
                 }
 

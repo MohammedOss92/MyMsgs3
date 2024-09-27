@@ -32,6 +32,11 @@ import com.abdallah.sarrawi.mymsgs.paging.MsgsTypesAdapterPaging
 import com.abdallah.sarrawi.mymsgs.repository.MsgsRepo
 import com.abdallah.sarrawi.mymsgs.ui.MainActivity
 import com.abdallah.sarrawi.mymsgs.vm.*
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.material.snackbar.Snackbar
 
 import kotlinx.coroutines.flow.collectLatest
@@ -47,7 +52,7 @@ class SecondFragment : Fragment() , CallBack {
     private var argsId = -1
     private var MsgTypes_name = ""
     var clickCount = 0
-
+    var mInterstitialAd: InterstitialAd?=null
 //    lateinit var  msgsAdapter :Msgs_Adapter
 //    private val msgsAdapter by lazy { Msgs_Adapter(requireContext(),this) }
 //    private val retrofitService = ApiService.provideRetrofitInstance()
@@ -99,6 +104,8 @@ class SecondFragment : Fragment() , CallBack {
 
 
         setup()
+        InterstitialAd_fun()
+        loadInterstitialAd()
 
         menu_item()
 
@@ -135,12 +142,12 @@ class SecondFragment : Fragment() , CallBack {
                 clickCount++
                 if (clickCount >= 2) {
 // بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
-//                    if (mInterstitialAd != null) {
-//                        mInterstitialAd?.show(requireActivity())
-//                        loadInterstitialAd()
-//                    } else {
-//                        Log.d("TAG", "The interstitial ad wasn't ready yet.")
-//                    }
+                    if (mInterstitialAd != null) {
+                        mInterstitialAd?.show(requireActivity())
+                        loadInterstitialAd()
+                    } else {
+                        Log.d("TAG", "The interstitial ad wasn't ready yet.")
+                    }
                     clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
 
                 }
@@ -290,6 +297,7 @@ class SecondFragment : Fragment() , CallBack {
                                 Log.d("PagingData", "Received paging data: ${pagingData}")
                                 msgsAdapterPaging.submitData(lifecycle, pagingData)
                                 scrollToBookmark()
+                                showInterstitial()
                             }
 
 //                            vm_msgs.itemsss.collectLatest { pagingData ->
@@ -360,5 +368,73 @@ class SecondFragment : Fragment() , CallBack {
         }
     }
 
+
+    fun InterstitialAd_fun (){
+
+
+        MobileAds.initialize(requireActivity()) { initializationStatus ->
+            // do nothing on initialization complete
+        }
+
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            requireActivity(),
+            "ca-app-pub-1895204889916566/9391166409",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    // The mInterstitialAd reference will be null until an ad is loaded.
+                    mInterstitialAd = interstitialAd
+                    Log.i("onAdLoadedL", "onAdLoaded")
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    // Handle the error
+                    Log.d("onAdLoadedF", loadAdError.toString())
+                    mInterstitialAd = null
+                }
+            }
+        )
+    }
+    fun loadInterstitialAd() {
+        MobileAds.initialize(requireActivity()) { initializationStatus ->
+            // do nothing on initialization complete
+        }
+
+        val adRequest = AdRequest.Builder().build()
+        InterstitialAd.load(
+            requireActivity(),
+            "ca-app-pub-1895204889916566/9391166409",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    // The mInterstitialAd reference will be null until an ad is loaded.
+                    mInterstitialAd = interstitialAd
+                    Log.i("onAdLoadedL", "onAdLoaded")
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    // Handle the error
+                    Log.d("onAdLoadedF", loadAdError.toString())
+                    mInterstitialAd = null
+                }
+            }
+        )
+    }
+
+    fun showInterstitial(){
+        clickCount++
+        if (clickCount >= 2) {
+// بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
+            if (mInterstitialAd != null) {
+                mInterstitialAd?.show(requireActivity())
+                loadInterstitialAd()
+            } else {
+                Log.d("TAG", "The interstitial ad wasn't ready yet.")
+            }
+            clickCount = 0 // اعيد قيمة المتغير clickCount إلى الصفر بعد عرض الإعلان
+
+        }
+    }
 
 }

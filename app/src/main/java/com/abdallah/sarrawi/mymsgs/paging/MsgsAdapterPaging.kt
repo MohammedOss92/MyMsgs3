@@ -22,13 +22,13 @@ import com.abdallah.sarrawi.mymsgs.databinding.MsgsDesignBinding
 import com.abdallah.sarrawi.mymsgs.models.MsgModelWithTitle
 import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 import com.abdallah.sarrawi.mymsgs.ui.fragments.NewMsgsFragmentDirections
+import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragment
 import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragmentDirections
 
 class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter<MsgModelWithTitle, MsgsAdapterPaging.ViewHolder>(COMPARATOR) {
 
         var onItemClick2: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
         var onItemClick: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
-        var msgsListFull: List<MsgsModel> = listOf()
 
 
         inner class ViewHolder(private val binding: MsgsDesignBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -77,6 +77,7 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
                         }
 
                     }
+                    (frag as? SecondFragment)?.showInterstitial()
                 }
                 if(msgsModel.msgModel!!.isBookmark==1){
 
