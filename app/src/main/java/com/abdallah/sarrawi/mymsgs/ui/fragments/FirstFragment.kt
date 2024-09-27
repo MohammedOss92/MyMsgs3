@@ -202,7 +202,9 @@ class FirstFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
 
                 when(menuItem.itemId){
-
+                    R.id.action_refresh ->{
+                        startRefreshing()
+                    }
 
                     R.id.action_theme -> {
 

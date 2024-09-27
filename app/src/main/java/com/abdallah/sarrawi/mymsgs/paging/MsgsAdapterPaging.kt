@@ -28,7 +28,7 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
 
         var onItemClick2: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
         var onItemClick: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
-
+        var msgsListFull: List<MsgsModel> = listOf()
 
 
         inner class ViewHolder(private val binding: MsgsDesignBinding) : RecyclerView.ViewHolder(binding.root) {

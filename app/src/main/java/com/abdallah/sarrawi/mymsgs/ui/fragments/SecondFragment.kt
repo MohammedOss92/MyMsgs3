@@ -113,8 +113,8 @@ class SecondFragment : Fragment() , CallBack {
         if (isAdded) {
             binding.rcMsgs.layoutManager = LinearLayoutManager(requireContext())
 
-            val pagingAdapter = MsgsAdapterPaging(requireContext(),this)
-            binding.rcMsgs.adapter = pagingAdapter
+//            val pagingAdapter = MsgsAdapterPaging(requireContext(),this)
+            binding.rcMsgs.adapter = msgsAdapterPaging
 //            lifecycleScope.launch {
 //                nokatViewModel.invalidatePagingSource()
 //                nokatViewModel.nokatFlow.collectLatest { pagingData ->
@@ -127,11 +127,11 @@ class SecondFragment : Fragment() , CallBack {
 //                    pagingAdapter.submitData(lifecycle, pagingData)
                 vm_msgs.itemsswhereID(argsId).observe(viewLifecycleOwner) { pagingData ->
                     Log.d("PagingData", "Received paging data: ${pagingData}")
-                    pagingAdapter.submitData(lifecycle, pagingData)
+                    msgsAdapterPaging.submitData(lifecycle, pagingData)
                 }
             }
 
-            pagingAdapter.onItemClick = { id, item, position ->
+            msgsAdapterPaging.onItemClick = { id, item, position ->
                 clickCount++
                 if (clickCount >= 2) {
 // بمجرد أن يصل clickCount إلى 4، اعرض الإعلان
@@ -156,7 +156,7 @@ class SecondFragment : Fragment() , CallBack {
                     lifecycleScope.launch {
                         val snackbar = Snackbar.make(requireView(), "تم الحذف من المفضلة", Snackbar.LENGTH_SHORT)
                         snackbar.show()
-                        pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                        msgsAdapterPaging.notifyItemChanged(position) // Update UI after operation
                     }
                 } else {
                     vm_msgs.update_favs(item.msgModel!!.id, true)
@@ -164,20 +164,21 @@ class SecondFragment : Fragment() , CallBack {
                     lifecycleScope.launch {
                         val snackbar = Snackbar.make(requireView(), "تم الاضافة الى المفضلة", Snackbar.LENGTH_SHORT)
                         snackbar.show()
-                        pagingAdapter.notifyItemChanged(position) // Update UI after operation
+                        msgsAdapterPaging.notifyItemChanged(position) // Update UI after operation
                     }
                 }
             }
-            pagingAdapter.onItemClick2 = { bookmarkState, item, position ->
+            msgsAdapterPaging.onItemClick2 = { bookmarkState, item, position ->
                 val newBookmarkState = if (item.msgModel!!.isBookmark == 0) 1 else 0
                 item.msgModel!!.isBookmark = newBookmarkState // تحديث الحالة محلياً
                 vm_msgs.setBookmarkForItem(item.msgModel!!) // تمرير العنصر إلى ViewModel لتحديثه في قاعدة البيانات
+                msgsAdapterPaging.notifyItemChanged(position)
             }
 
 
 
 
-            pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+            msgsAdapterPaging.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 
@@ -280,6 +281,25 @@ class SecondFragment : Fragment() , CallBack {
                         NavHostFragment.findNavController(this@SecondFragment).navigate(dir)
                     }
 
+                    R.id.action_bookmark -> {
+
+
+                        lifecycleScope.launch {
+
+                            vm_msgs.itemsswhereID(argsId).observe(viewLifecycleOwner) { pagingData ->
+                                Log.d("PagingData", "Received paging data: ${pagingData}")
+                                msgsAdapterPaging.submitData(lifecycle, pagingData)
+                                scrollToBookmark()
+                            }
+
+//                            vm_msgs.itemsss.collectLatest { pagingData ->
+//                                msgsAdapterPaging.submitData(pagingData) // تأكد من تحميل البيانات أولاً
+//                                scrollToBookmark() // التمرير بعد تحميل البيانات
+//                            }
+                        }
+                    }
+
+
 
                 }
                 return true
@@ -294,6 +314,8 @@ class SecondFragment : Fragment() , CallBack {
         popupMenu.setOnMenuItemClickListener {
             when(it.itemId){
 
+
+
                 R.id.edit ->{
 //                    Toast.makeText(requireContext(), "edit", Toast.LENGTH_SHORT).show()
 //                    val direction = SecondFragmentDirections.actionSecondFragmentToEditFragment()
@@ -307,4 +329,36 @@ class SecondFragment : Fragment() , CallBack {
         }
         popupMenu.show()
     }
+
+
+
+    fun scrollToBookamark() {
+        val snapshot = msgsAdapterPaging.snapshot() // الحصول على البيانات الحالية
+        for (i in snapshot.indices) {
+            val item = snapshot[i]
+
+            // التحقق أن العنصر غير فارغ وأن isBookmark يساوي 1
+            if (item?.msgModel?.isBookmark == 1) {
+                // التمرير إلى الموضع المحدد
+                binding.rcMsgs.scrollToPosition(i)
+                break // نوقف البحث بمجرد العثور على العنصر
+            }
+        }
+    }
+    fun scrollToBookmark() {
+        val layoutManager = binding.rcMsgs.layoutManager as LinearLayoutManager
+        val snapshot = msgsAdapterPaging.snapshot() // الحصول على البيانات الحالية
+        for (i in snapshot.indices) {
+            val item = snapshot[i]
+
+            // التحقق أن العنصر غير فارغ وأن isBookmark يساوي 1
+            if (item?.msgModel?.isBookmark == 1) {
+                // استخدام scrollToPositionWithOffset للتمرير إلى الموضع بعد تحميل العناصر
+                layoutManager.scrollToPositionWithOffset(i, 0)
+                break // نوقف البحث بمجرد العثور على العنصر
+            }
+        }
+    }
+
+
 }

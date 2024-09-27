@@ -114,6 +114,13 @@ class MainActivity : AppCompatActivity() {
             // قم بتنفيذ العمليات المطلوبة هنا في حالة فشل العملية
         }
 
+    if (intent.hasExtra("targetScreen")) {
+        val targetScreen = intent.getStringExtra("targetScreen")
+        if ("screen1" == targetScreen) {
+            navController.navigate(R.id.newMsgsFragment)
+        }
+    }
+
     loadInterstitialAd()
 
 
@@ -133,24 +140,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_refresh -> {
-                val handler = Handler(Looper.getMainLooper())
 
-                lifecycleScope.launch {
-                    try {
-                        // استخدم this@MainActivity للحصول على السياق
-                        vm_msgs.refreshMsgsType(
-                            ApiService.provideRetrofitInstance(),
-                            PostDatabase.getInstance(this@MainActivity), // استخدام this@MainActivity للحصول على السياق
-                            findViewById(android.R.id.content) // استخدم findViewById إذا كنت تحتاج إلى View
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-//                viewModel.refreshPosts(this)
-                }
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
     }
