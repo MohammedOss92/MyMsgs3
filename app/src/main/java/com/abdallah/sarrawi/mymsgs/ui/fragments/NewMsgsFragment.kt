@@ -58,7 +58,7 @@ class NewMsgsFragment : Fragment(), CallBack {
 
     var clickCount = 0
     var mInterstitialAd: InterstitialAd?=null
-    private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this/*isDark*/) }
+    private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this, showElements = false/*isDark*/) }
     private var ID_Type_id=0
     private val retrofitService = ApiService.provideRetrofitInstance()
     private val mainRepository3 by lazy { Repo_Type(retrofitService, LocaleSource(requireContext()),
@@ -103,7 +103,7 @@ class NewMsgsFragment : Fragment(), CallBack {
         binding.rcMsgsNew.layoutManager = LinearLayoutManager(requireContext())
 
         // إنشاء الـ PagingAdapter
-        val pagingAdapter = MsgsAdapterPaging(requireContext(), this)
+        val pagingAdapter = MsgsAdapterPaging(requireContext(), this, showElements = false)
         binding.rcMsgsNew.adapter = pagingAdapter
 
         // مراقبة بيانات الـ ViewModel وتحديث الـ RecyclerView
@@ -174,7 +174,7 @@ class NewMsgsFragment : Fragment(), CallBack {
 //                    .show()
 //            }
 //        }
-        val pagingAdapter = MsgsAdapterPaging(requireContext(),this)
+        val pagingAdapter = MsgsAdapterPaging(requireContext(),this, showElements = false)
         pagingAdapter.onItemClick = { id, item, position ->
             clickCount++
             if (clickCount >= 2) {
@@ -253,14 +253,14 @@ class NewMsgsFragment : Fragment(), CallBack {
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 // Add menu items here
-                menuInflater.inflate(R.menu.second_frag_menu, menu)
+                menuInflater.inflate(R.menu.new_frag_menu, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
 
                 when(menuItem.itemId){
 
-                    R.id.action_zakrafah ->{
+                    R.id.action_zakrafah_new ->{
                         val dir = NewMsgsFragmentDirections.actionNewMsgsFragmentToEditFragment("")
                         NavHostFragment.findNavController(this@NewMsgsFragment).navigate(dir)
                     }

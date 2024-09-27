@@ -65,7 +65,7 @@ class SecondFragment : Fragment() , CallBack {
 
     var onBookmarkClick: ((MsgsModel) -> Unit)? = null
     lateinit var msgsModel: MsgsModel
-    private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this/*isDark*/) }
+    private val msgsAdapterPaging by lazy {  MsgsAdapterPaging(requireContext(),this, showElements = true/*isDark*/) }
     private var ID_Type_id=0
     private val retrofitService = ApiService.provideRetrofitInstance()
     private val mainRepository3 by lazy { Repo_Type(retrofitService, LocaleSource(requireContext()),
@@ -436,5 +436,8 @@ class SecondFragment : Fragment() , CallBack {
 
         }
     }
+
+
+
 
 }

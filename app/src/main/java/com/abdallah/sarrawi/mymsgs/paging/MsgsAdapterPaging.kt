@@ -25,7 +25,7 @@ import com.abdallah.sarrawi.mymsgs.ui.fragments.NewMsgsFragmentDirections
 import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragment
 import com.abdallah.sarrawi.mymsgs.ui.fragments.SecondFragmentDirections
 
-class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter<MsgModelWithTitle, MsgsAdapterPaging.ViewHolder>(COMPARATOR) {
+class MsgsAdapterPaging (val con: Context,val frag: Fragment, private var showElements: Boolean): PagingDataAdapter<MsgModelWithTitle, MsgsAdapterPaging.ViewHolder>(COMPARATOR) {
 
         var onItemClick2: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
         var onItemClick: ((Int, MsgModelWithTitle, Int) -> Unit)? = null
@@ -69,25 +69,33 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
 
                 }
 
-                binding.bookmarkBtn.setOnClickListener {
-                    val position = bindingAdapterPosition
-                    if (position != RecyclerView.NO_POSITION) {
-                        getItem(position)?.let { item ->
-                            onItemClick2?.invoke(item.msgModel!!.isBookmark ?: 0, item, position)
+                if (showElements) {
+
+                    binding.bookmarkBtn.setOnClickListener {
+                        val position = bindingAdapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            getItem(position)?.let { item ->
+                                onItemClick2?.invoke(item.msgModel!!.isBookmark ?: 0, item, position)
+                            }
+
                         }
+                        (frag as? SecondFragment)?.showInterstitial()
+                    }
+                    if(msgsModel.msgModel!!.isBookmark==1){
+
+                        binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_t)
 
                     }
-                    (frag as? SecondFragment)?.showInterstitial()
-                }
-                if(msgsModel.msgModel!!.isBookmark==1){
+                    else{
 
-                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_t)
+                        binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_f)
+                    }
+                    binding.bookmarkBtn.visibility = View.VISIBLE
 
+                } else {
+                    binding.bookmarkBtn.visibility = View.GONE
                 }
-                else{
 
-                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_f)
-                }
 
             }
 
@@ -166,6 +174,11 @@ class MsgsAdapterPaging (val con: Context,val frag: Fragment): PagingDataAdapter
                 holder.bind(it)
             }
         }
+
+    fun setshowElements(show: Boolean) {
+        showElements = show
+        notifyDataSetChanged() // تحديث العرض
+    }
 
         companion object {
             private val COMPARATOR = object : DiffUtil.ItemCallback<MsgModelWithTitle>() {
