@@ -41,7 +41,12 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
         get() = _isConnected
 
 
+    private val _pagingSourceFactory = MutableLiveData<PagingSource<Int, MsgsModel>>()
 
+
+    fun invalidatePagingSourceTypes() {
+        _pagingSourceFactory.value = _pagingSourceFactory.value // قم بإعادة تعيين القيمة لتنشيط PagingSource
+    }
 
     fun checkNetworkConnection(applicationContext: Context) {
         val networkConnection = NetworkConnection(applicationContext)
@@ -117,6 +122,7 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
     }
 
 
+
     suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
         if (internetCheck(context)) {
             var page = 1 // البدء بالصفحة الأولى
@@ -129,7 +135,21 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
                     if (response.isSuccessful) {
                         msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
                         if (msgsTypesList.isNotEmpty()) {
-                            database.typesDao().insertPosts(msgsTypesList)
+
+
+                            withContext(Dispatchers.IO) {
+                                try {
+                                    Log.d("DB Debug", "Attempting to delete all posts")
+                                    database.typesDao().deleteALlPosts()  // حذف البيانات القديمة
+                                    Log.d("DB Debug", "Attempting to delete all posts")
+                                    database.msgsDao().deleteAllmessage()  // حذف البيانات القديمة
+                                    database.typesDao().insertPosts(msgsTypesList)
+                                } catch (e: Exception) {
+                                    Log.e("DB Error", "Error deleting all posts: ${e.message}")
+                                }
+                            }
+
+
                             page++
                             for (nokatType in msgsTypesList) {
                                 refreshMsgswithID(apiService, database, nokatType.id)

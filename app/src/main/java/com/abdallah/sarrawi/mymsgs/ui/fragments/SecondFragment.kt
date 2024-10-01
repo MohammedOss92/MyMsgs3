@@ -1,5 +1,6 @@
 package com.abdallah.sarrawi.mymsgs.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -116,6 +117,7 @@ class SecondFragment : Fragment() , CallBack {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setup() {
         if (isAdded) {
             binding.rcMsgs.layoutManager = LinearLayoutManager(requireContext())
@@ -136,6 +138,7 @@ class SecondFragment : Fragment() , CallBack {
                     Log.d("PagingData", "Received paging data: ${pagingData}")
                     msgsAdapterPaging.submitData(lifecycle, pagingData)
                 }
+                vm_msgs.invalidatePagingSourceTypes()
             }
 
             msgsAdapterPaging.onItemClick = { id, item, position ->
@@ -163,7 +166,6 @@ class SecondFragment : Fragment() , CallBack {
                     lifecycleScope.launch {
                         val snackbar = Snackbar.make(requireView(), "تم الحذف من المفضلة", Snackbar.LENGTH_SHORT)
                         snackbar.show()
-                        msgsAdapterPaging.notifyItemChanged(position) // Update UI after operation
                     }
                 } else {
                     vm_msgs.update_favs(item.msgModel!!.id, true)
@@ -171,7 +173,6 @@ class SecondFragment : Fragment() , CallBack {
                     lifecycleScope.launch {
                         val snackbar = Snackbar.make(requireView(), "تم الاضافة الى المفضلة", Snackbar.LENGTH_SHORT)
                         snackbar.show()
-                        msgsAdapterPaging.notifyItemChanged(position) // Update UI after operation
                     }
                 }
             }
@@ -179,9 +180,7 @@ class SecondFragment : Fragment() , CallBack {
                 val newBookmarkState = if (item.msgModel!!.isBookmark == 0) 1 else 0
                 item.msgModel!!.isBookmark = newBookmarkState // تحديث الحالة محلياً
                 vm_msgs.setBookmarkForItem(item.msgModel!!) // تمرير العنصر إلى ViewModel لتحديثه في قاعدة البيانات
-                msgsAdapterPaging.notifyItemChanged(position)
             }
-
 
 
 

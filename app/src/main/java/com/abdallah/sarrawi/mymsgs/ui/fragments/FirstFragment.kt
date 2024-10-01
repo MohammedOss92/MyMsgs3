@@ -1,5 +1,6 @@
 package com.abdallah.sarrawi.mymsgs.ui.fragments
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
@@ -165,13 +166,32 @@ class FirstFragment : Fragment() {
 
 
 
-    private fun setUpRv2() = vm_types.viewModelScope.launch {
+    private fun setup() = vm_types.viewModelScope.launch {
+
+        if (isAdded) {
+            binding.rcMsgTypes.layoutManager = LinearLayoutManager(requireContext())
+
+            val pagingAdapter = MsgsTypesAdapterPaging(requireContext(), this@FirstFragment)
+            binding.rcMsgTypes.adapter = pagingAdapter
+            lifecycleScope.launch {
 
 
+                vm_types.msgType.observe(viewLifecycleOwner) { pagingData ->
+                    pagingAdapter.submitData(lifecycle, pagingData)
+                    pagingAdapter.notifyDataSetChanged()
+                }
+                vm_types.invalidatePagingSourceTypes()
+                pagingAdapter.notifyDataSetChanged()
+            }
+            vm_types.invalidatePagingSourceTypes()
+            pagingAdapter.notifyDataSetChanged()
+
+            pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        }
 
     }
 
-    private fun setup() {
+    private fun setup1() {
         if (isAdded) {
             binding.rcMsgTypes.layoutManager = LinearLayoutManager(requireContext())
 
@@ -183,10 +203,14 @@ class FirstFragment : Fragment() {
 //                    Log.d("NokatTypeFlow", "Received new paging data: $pagingData")
 //                    pagingAdapter.submitData(pagingData)
 //                }
+
                 vm_types.msgType.observe(viewLifecycleOwner) { pagingData ->
                     pagingAdapter.submitData(lifecycle, pagingData)
+
                 }
+                vm_types.invalidatePagingSourceTypes()
             }
+
             pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
@@ -206,6 +230,7 @@ class FirstFragment : Fragment() {
 
                 when(menuItem.itemId){
                     R.id.action_refresh ->{
+
                         startRefreshing()
                     }
 

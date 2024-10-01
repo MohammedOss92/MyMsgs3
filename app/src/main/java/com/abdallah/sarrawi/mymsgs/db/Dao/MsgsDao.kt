@@ -43,7 +43,10 @@ interface MsgsDao {
 
 
     @Query("delete from msgs_table")
-    fun deleteAllmessage()
+    suspend fun deleteAllmessage()
+
+    @Query("delete from msgs_table")
+    suspend fun deleteAllmessage2()
 
     // update msg_table items favorite state
     @Query("Update msgs_table SET is_fav = :state where id =:ID")
@@ -63,5 +66,11 @@ interface MsgsDao {
         resetBookmarksInMsgs(newBookmark.ID_Type_id)
         // تحديث العنصر الجديد ليكون مؤشراً عليه
         updateMsg(newBookmark.copy(isBookmark = 1))
+    }
+
+    @Transaction
+    suspend fun insDel(msgs: List<MsgsModel>){
+        deleteAllmessage()
+        insert_msgs(msgs)
     }
 }

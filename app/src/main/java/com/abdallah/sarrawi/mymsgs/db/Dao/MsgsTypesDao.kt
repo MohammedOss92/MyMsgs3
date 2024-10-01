@@ -19,8 +19,11 @@ interface MsgsTypesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPosts(posts: List<MsgsTypesModel>)
 
+    @Query("delete from msgs_types_table")
+    suspend fun deleteALlPosts()
+
     @Query("DELETE FROM msgs_types_table")
-    fun deleteALlPosts()
+    suspend fun deleteALlPosts2()
 
 
 

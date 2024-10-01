@@ -65,9 +65,7 @@ class LocaleSource(context: Context) {
         Msgs_Dao?.insert_msgs(msgs)!!
     }
 
-    suspend fun deletePosts() {
-        TypesDao?.deleteALlPosts()
-    }
+
 
     /************************/
     suspend fun add_fav(fav: FavoriteModel){

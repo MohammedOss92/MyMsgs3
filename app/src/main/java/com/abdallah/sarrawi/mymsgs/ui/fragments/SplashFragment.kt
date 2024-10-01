@@ -71,18 +71,47 @@ class SplashFragment : Fragment() {
         imgSplash.setAnimation(uptodown)
 
         Handler(Looper.myLooper()!!).postDelayed({
-//            val direction = SplashFragmentDirections.actionSplashFragmentToFirsFragment()
-//            findNavController().navigate(direction)
+            val navController = findNavController()
 
-            findNavController()
-                .navigate(R.id.action_splashFragment_to_firsFragment,
-                    null,
-                    NavOptions.Builder()
-                        .setPopUpTo(R.id.splashFragment,
-                            true).build()
-                )
+            // تحقق من وجود extra في الـ intent
+            val targetScreen = activity?.intent?.getStringExtra("targetScreen")
 
-        },5000)
+            // تحقق من القيمة، وإذا لم تكن موجودة، انتقل إلى firsFragment بشكل افتراضي
+            when (targetScreen) {
+                "screen1" -> {
+                    navController.navigate(R.id.newMsgsFragment)
+                }
+                null, "" -> {
+                    // إذا لم تكن هناك قيمة، انتقل إلى firsFragment بشكل افتراضي
+                    navController.navigate(R.id.action_splashFragment_to_firsFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setPopUpTo(R.id.splashFragment, true).build()
+                    )
+                }
+                else -> {
+                    // يمكنك وضع حالة افتراضية هنا إذا كانت هناك حالات أخرى
+                    navController.navigate(R.id.action_splashFragment_to_firsFragment)
+                }
+            }
+
+        }, 5000)
+
+//        Handler(Looper.myLooper()!!).postDelayed({
+////            val direction = SplashFragmentDirections.actionSplashFragmentToFirsFragment()
+////            findNavController().navigate(direction)
+//
+//            findNavController()
+//                .navigate(R.id.action_splashFragment_to_firsFragment,
+//                    null,
+//                    NavOptions.Builder()
+//                        .setPopUpTo(R.id.splashFragment,
+//                            true).build()
+//                )
+//
+//        },5000)
+
+
 
     }
 
