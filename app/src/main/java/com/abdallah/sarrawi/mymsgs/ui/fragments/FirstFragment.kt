@@ -179,6 +179,7 @@ class FirstFragment : Fragment() {
                 vm_types.msgType.observe(viewLifecycleOwner) { pagingData ->
                     pagingAdapter.submitData(lifecycle, pagingData)
                     pagingAdapter.notifyDataSetChanged()
+
                 }
                 vm_types.invalidatePagingSourceTypes()
                 pagingAdapter.notifyDataSetChanged()

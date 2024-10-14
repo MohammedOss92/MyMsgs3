@@ -180,6 +180,8 @@ class SecondFragment : Fragment() , CallBack {
                 val newBookmarkState = if (item.msgModel!!.isBookmark == 0) 1 else 0
                 item.msgModel!!.isBookmark = newBookmarkState // تحديث الحالة محلياً
                 vm_msgs.setBookmarkForItem(item.msgModel!!) // تمرير العنصر إلى ViewModel لتحديثه في قاعدة البيانات
+                msgsAdapterPaging.notifyItemChanged(position)
+
             }
 
 
