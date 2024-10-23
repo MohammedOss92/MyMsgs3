@@ -1,5 +1,6 @@
 package com.abdallah.sarrawi.mymsgs.vm
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -93,4 +94,23 @@ class Repo_Type constructor(val apiService: ApiService, private val localeSource
     suspend fun setBookmarkForItem(item: MsgsModel) {
         database.msgsDao().setBookmarkForMsg(item)
     }
+
+    suspend fun replaceAll(posts:List<MsgsTypesModel>){
+        database.typesDao().replaceAll(posts)
+
+    }
+
+    suspend fun replaceMsg(msgs:List<MsgsModel>){
+        database.msgsDao().insert_msgs(msgs)
+    }
+
+    suspend fun deletemsgtypes(){
+        database.typesDao().deleteALlPosts()
+    }
+
+    suspend fun deletemsgs(){
+        database.msgsDao().deleteAllmessage()
+    }
+
+
 }

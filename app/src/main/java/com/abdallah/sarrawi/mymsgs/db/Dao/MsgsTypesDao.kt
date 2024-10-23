@@ -22,8 +22,6 @@ interface MsgsTypesDao {
     @Query("delete from msgs_types_table")
     suspend fun deleteALlPosts()
 
-    @Query("DELETE FROM msgs_types_table")
-    suspend fun deleteALlPosts2()
 
 
 
@@ -47,5 +45,12 @@ interface MsgsTypesDao {
                 "GROUP BY c.id"
     )
     fun getAllMsgTypesWithCountspa(): PagingSource<Int,MsgsTypeWithCount>
+
+    @Transaction
+    suspend fun replaceAll(posts:List<MsgsTypesModel>){
+        deleteALlPosts()
+
+        insertPosts(posts)
+    }
 
 }

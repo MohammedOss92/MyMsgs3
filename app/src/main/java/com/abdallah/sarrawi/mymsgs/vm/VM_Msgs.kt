@@ -89,7 +89,9 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
                             msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
                             if (msgsTypesList.isNotEmpty()) {
                                 withContext(Dispatchers.IO) {
-                                    database.typesDao().insertPosts(msgsTypesList)
+                                    database.typesDao().replaceAll(msgsTypesList)
+                                    val currentSize = database.typesDao().getAllMsgTypesWithCountspa() // افترض وجود دالة لاسترجاع العدد
+                                    Log.d("Current Size", "Number of msgs types after replacement: $currentSize")
                                 }
                                 page++
 
@@ -139,11 +141,8 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
 
                             withContext(Dispatchers.IO) {
                                 try {
-                                    Log.d("DB Debug", "Attempting to delete all posts")
-                                    database.typesDao().deleteALlPosts()  // حذف البيانات القديمة
-                                    Log.d("DB Debug", "Attempting to delete all posts")
-                                    database.msgsDao().deleteAllmessage()  // حذف البيانات القديمة
                                     database.typesDao().insertPosts(msgsTypesList)
+
                                 } catch (e: Exception) {
                                     Log.e("DB Error", "Error deleting all posts: ${e.message}")
                                 }
@@ -213,6 +212,7 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
             if (allMsgs.isNotEmpty()) {
                 // إدخال جميع الرسائل في قاعدة البيانات دفعة واحدة بعد الجلب
                 Log.d("API Debug", "Inserting all ${allMsgs.size} messages into the database for ID_Type_id: $ID_Type_id")
+
                 database.msgsDao().insert_msgs(allMsgs)
             } else {
                 Log.d("API Info", "No messages to insert into the database for ID_Type_id: $ID_Type_id")
@@ -378,6 +378,14 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
         viewModelScope.launch {
             repo_type.setBookmarkForItem(item)
         }
+    }
+
+    suspend fun deletemsgtypes(){
+        repo_type.deletemsgtypes()
+    }
+
+    suspend fun deletemsg(){
+        repo_type.deletemsgs()
     }
 
 }

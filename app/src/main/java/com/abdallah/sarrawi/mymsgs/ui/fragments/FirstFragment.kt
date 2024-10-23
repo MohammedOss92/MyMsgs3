@@ -167,30 +167,24 @@ class FirstFragment : Fragment() {
 
 
     private fun setup() = vm_types.viewModelScope.launch {
-
         if (isAdded) {
             binding.rcMsgTypes.layoutManager = LinearLayoutManager(requireContext())
 
             val pagingAdapter = MsgsTypesAdapterPaging(requireContext(), this@FirstFragment)
             binding.rcMsgTypes.adapter = pagingAdapter
+
+            // مراقبة بيانات Paging والتحميل
             lifecycleScope.launch {
-
-
                 vm_types.msgType.observe(viewLifecycleOwner) { pagingData ->
                     pagingAdapter.submitData(lifecycle, pagingData)
-                    pagingAdapter.notifyDataSetChanged()
-
                 }
-                vm_types.invalidatePagingSourceTypes()
-                pagingAdapter.notifyDataSetChanged()
             }
-            vm_types.invalidatePagingSourceTypes()
-            pagingAdapter.notifyDataSetChanged()
 
+            // تهيئة سياسة استعادة الحالة
             pagingAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-
     }
+
 
     private fun setup1() {
         if (isAdded) {
@@ -317,25 +311,28 @@ class FirstFragment : Fragment() {
         // بدء عملية التحديث
         binding.swipeRefreshLayout.isRefreshing = true // بدء عملية التحديث
 
-        // إنشاء Handler للتأخير قبل إيقاف التحديث
-        val handler = Handler(Looper.getMainLooper())
+
 
         lifecycleScope.launch {
             try {
+                vm_msgs.deletemsg()
+                vm_msgs.deletemsgtypes()
+
                 // هنا يمكنك استدعاء عملية التحديث الفعلي إذا لزم الأمر
                 vm_msgs.refreshMsgsType(
                     ApiService.provideRetrofitInstance(),
                     PostDatabase.getInstance(requireContext()),
                     requireView()
                 )
+                vm_types.invalidatePagingSourceTypes() // إعادة تحميل البيانات من Room بعد التحديث
+
             } catch (e: Exception) {
                 // التعامل مع الأخطاء
                 e.printStackTrace()
             } finally {
                 // تأخير إيقاف التحديث لمدة 5 ثوانٍ بعد بدء التحديث
-                handler.postDelayed({
                     binding.swipeRefreshLayout.isRefreshing = false
-                }, 1000) // تأخير 5 ثوانٍ
+                // تأخير 5 ثوانٍ
             }
         }
     }
