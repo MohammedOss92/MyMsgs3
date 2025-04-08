@@ -43,7 +43,7 @@ interface ApiService {
         fun provideRetrofitInstance(): ApiService {
             if (retrofitService == null) {
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("http://www.sarrawi.com/")
+                    .baseUrl("https://abdallahprojectrender.onrender.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
                 retrofitService = retrofit.create(ApiService::class.java)

@@ -14,7 +14,7 @@ import com.abdallah.sarrawi.mymsgs.models.FavoriteModel
 import com.abdallah.sarrawi.mymsgs.models.LocalDateTimeConverter
 import com.abdallah.sarrawi.mymsgs.models.MsgsModel
 import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
-
+/*في كوتلن، الـ companion object هو كائن ثابت مرتبط بالكلاس نفسه، ويمكنك الوصول إليه من خلال الكلاس دون الحاجة لإنشاء كائن جديد من الكلاس. أما بالنسبة لـ Singleton فهو نمط تصميم يهدف إلى أن يكون هناك كائن واحد فقط من الكلاس طوال فترة تشغيل البرنامج.*/
 @Database(
     entities = [MsgsTypesModel::class, MsgsModel::class, FavoriteModel::class],
     version = 2,
