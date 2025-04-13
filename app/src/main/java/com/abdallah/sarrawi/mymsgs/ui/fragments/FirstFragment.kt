@@ -315,8 +315,8 @@ class FirstFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                vm_msgs.deletemsg()
-                vm_msgs.deletemsgtypes()
+//                vm_msgs.deletemsg()
+//                vm_msgs.deletemsgtypes()
 
                 // هنا يمكنك استدعاء عملية التحديث الفعلي إذا لزم الأمر
                 vm_msgs.refreshMsgsType(
