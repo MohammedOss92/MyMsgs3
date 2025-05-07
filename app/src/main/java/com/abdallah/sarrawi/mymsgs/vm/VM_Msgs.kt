@@ -123,7 +123,112 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
         }
     }
 
+/*
+* suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
+    if (internetCheck(context)) {
+        var page = 1
+        var msgsTypesList: List<MsgsTypesModel>
 
+        try {
+            do {
+                Log.d("API Debug", "جلب أنواع الرسائل من الصفحة: $page")
+                val response = apiService.getMsgsTypes_Ser2(page)
+
+                if (response.isSuccessful) {
+                    // جلب قائمة الأنواع من الرد
+                    msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
+
+                    if (msgsTypesList.isNotEmpty()) {
+                        // إدخال الأنواع إلى قاعدة البيانات في سياق الـ IO
+                        withContext(Dispatchers.IO) {
+                            try {
+                                database.typesDao().insertPosts(msgsTypesList)
+                            } catch (e: Exception) {
+                                Log.e("DB Error", "خطأ أثناء حفظ الأنواع: ${e.message}")
+                            }
+                        }
+
+                        // لكل نوع، جلب الرسائل الخاصة به
+                        for (nokatType in msgsTypesList) {
+                            refreshMsgswithID(apiService, database, nokatType.id)
+                        }
+
+                        page++ // الانتقال للصفحة التالية
+                    } else {
+                        break // لا يوجد أنواع إضافية، إيقاف التكرار
+                    }
+                } else {
+                    Log.e("API Error", response.errorBody()?.string() ?: "خطأ غير معروف")
+                    msgsTypesList = emptyList()
+                }
+            } while (msgsTypesList.isNotEmpty())
+
+        } catch (e: IOException) {
+            Log.e("Network Error", "مشكلة في الاتصال: ${e.message}")
+            throw e
+        } catch (e: HttpException) {
+            Log.e("HTTP Error", "خطأ في الخادم: ${e.message}")
+        }
+    } else {
+        Snackbar.make(view, "يرجى التحقق من اتصالك بالإنترنت..", Snackbar.LENGTH_SHORT).show()
+    }
+}
+
+* suspend fun refreshMsgswithID(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
+    var page = 1
+    val allMsgs = mutableListOf<MsgsModel>()
+    var isLastPage = false
+
+    try {
+        do {
+            Log.d("API Debug", "جلب الرسائل للنوع ID: $ID_Type_id، الصفحة: $page")
+            val response = apiService.getMsgs_Ser2(ID_Type_id, page)
+
+            if (response.isSuccessful) {
+                val msgList = response.body()?.results?.MsgsModel ?: emptyList()
+
+                if (msgList.isNotEmpty()) {
+                    allMsgs.addAll(msgList)
+                    page++ // جلب الصفحة التالية
+                } else {
+                    Log.d("API Info", "لا توجد رسائل إضافية في الصفحة: $page")
+                    isLastPage = true
+                }
+
+            } else {
+                when (response.code()) {
+                    404 -> {
+                        Log.e("API Error", "الصفحة $page غير موجودة للنوع ID: $ID_Type_id، تم التوقف.")
+                        isLastPage = true
+                    }
+                    else -> {
+                        Log.e("API Error", "فشل في جلب الرسائل: ${response.errorBody()?.string()}")
+                        isLastPage = true
+                    }
+                }
+            }
+
+        } while (!isLastPage)
+
+        if (allMsgs.isNotEmpty()) {
+            Log.d("API Debug", "حفظ ${allMsgs.size} رسالة في قاعدة البيانات للنوع ID: $ID_Type_id")
+            withContext(Dispatchers.IO) {
+                database.msgsDao().insert_msgs(allMsgs)
+            }
+        } else {
+            Log.d("API Info", "لا توجد رسائل لحفظها في قاعدة البيانات للنوع ID: $ID_Type_id")
+        }
+
+    } catch (e: IOException) {
+        Log.e("Network Error", "مشكلة في الشبكة: ${e.message}")
+        throw IOException("Network error", e)
+    } catch (e: HttpException) {
+        Log.e("HTTP Error", "خطأ HTTP: ${e.message}")
+    } catch (e: Exception) {
+        Log.e("General Error", "خطأ غير متوقع: ${e.message}")
+    }
+}
+*/
 
     suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
         if (internetCheck(context)) {

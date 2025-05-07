@@ -75,6 +75,17 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    fun myapp() {
+        binding.myapps.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("https://play.google.com/store/apps/developer?id=Abdallah+Omar+AL+Sarrawi")
+                setPackage("com.android.vending") // لفتحه داخل متجر Play مباشرة
+            }
+            startActivity(intent)
+        }
+    }
+
+
 
     private fun appVers() {
         val appVersion = "${BuildConfig.VERSION_NAME}"

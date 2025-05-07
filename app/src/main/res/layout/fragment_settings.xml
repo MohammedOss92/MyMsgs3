@@ -78,4 +78,21 @@
 
     <!-- يمكنك إضافة المزيد من الـ TextView حسب الحاجة -->
 
+    <TextView
+        android:id="@+id/shape2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_ic" />
+
+    <TextView
+        android:id="@+id/myapps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:padding="8dp"
+        android:text="تطبيقاتنا"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
 </LinearLayout>
