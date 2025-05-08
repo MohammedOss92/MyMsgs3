@@ -97,19 +97,20 @@ class SplashFragment : Fragment() {
 
         }, 5000)
 
-        Handler(Looper.myLooper()!!).postDelayed({
-//            val direction = SplashFragmentDirections.actionSplashFragmentToFirsFragment()
-//            findNavController().navigate(direction)
+        Handler(Looper.getMainLooper()).postDelayed({
+            val navController = findNavController()
 
-            findNavController()
-                .navigate(R.id.action_splashFragment_to_firsFragment,
+            if (isAdded && navController.currentDestination?.id == R.id.splashFragment) {
+                navController.navigate(
+                    R.id.action_splashFragment_to_firsFragment,
                     null,
                     NavOptions.Builder()
-                        .setPopUpTo(R.id.splashFragment,
-                            true).build()
+                        .setPopUpTo(R.id.splashFragment, true)
+                        .build()
                 )
+            }
 
-        },5000)
+        }, 5000)
 
 
 
