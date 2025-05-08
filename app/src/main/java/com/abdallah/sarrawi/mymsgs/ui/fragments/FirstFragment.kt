@@ -332,7 +332,7 @@ class FirstFragment : Fragment() {
             } finally {
                 // تأخير إيقاف التحديث لمدة 5 ثوانٍ بعد بدء التحديث
                     binding.swipeRefreshLayout.isRefreshing = false
-                // تأخير 5 ثوانٍ
+
             }
         }
     }

@@ -20,18 +20,12 @@ import com.abdallah.sarrawi.mymsgs.models.MsgsTypesModel
 import com.abdallah.sarrawi.mymsgs.paging.MsgsPaging
 import com.abdallah.sarrawi.mymsgs.utils.NetworkConnection
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-
 
 
 class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val database: PostDatabase): ViewModel()  {
@@ -74,165 +68,9 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
 
 
 
-    suspend fun refreshMsgsType2(apiService: ApiService, database: PostDatabase, view: View) {
-        if (internetCheck(context)) {
-            CoroutineScope(Dispatchers.IO).launch {
-                var page = 1
-                var msgsTypesList: List<MsgsTypesModel>
-                var retryCount = 0
-
-                try {
-                    do {
-                        Log.d("API Debug", "Fetching msgs types for page: $page")
-                        val response = apiService.getMsgsTypes_Ser2(page)
-                        if (response.isSuccessful) {
-                            msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
-                            if (msgsTypesList.isNotEmpty()) {
-                                withContext(Dispatchers.IO) {
-                                    database.typesDao().replaceAll(msgsTypesList)
-                                    val currentSize = database.typesDao().getAllMsgTypesWithCountspa() // افترض وجود دالة لاسترجاع العدد
-                                    Log.d("Current Size", "Number of msgs types after replacement: $currentSize")
-                                }
-                                page++
-
-                                for (nokatType in msgsTypesList) {
-                                    refreshMsgswithID(apiService, database, nokatType.id)
-                                }
-
-                                retryCount = 0
-                            } else {
-                                break
-                            }
-                        } else {
-                            Log.e("API Error", response.errorBody()?.string() ?: "Unknown error")
-                            msgsTypesList = emptyList()
-                        }
-
-                        delay(500)
-
-                    } while (msgsTypesList.isNotEmpty() && retryCount < 3)
-                } catch (e: IOException) {
-                    Log.e("Network Error", "Network error occurred: ${e.message}")
-                    throw e
-                } catch (e: HttpException) {
-                    Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
-                }
-            }
-        } else {
-            Snackbar.make(view, "يرجى التحقق من اتصالك بالإنترنت..", Snackbar.LENGTH_SHORT).show()
-        }
-    }
-
-/*
-* suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
-    if (internetCheck(context)) {
-        var page = 1
-        var msgsTypesList: List<MsgsTypesModel>
-
-        try {
-            do {
-                Log.d("API Debug", "جلب أنواع الرسائل من الصفحة: $page")
-                val response = apiService.getMsgsTypes_Ser2(page)
-
-                if (response.isSuccessful) {
-                    // جلب قائمة الأنواع من الرد
-                    msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
-
-                    if (msgsTypesList.isNotEmpty()) {
-                        // إدخال الأنواع إلى قاعدة البيانات في سياق الـ IO
-                        withContext(Dispatchers.IO) {
-                            try {
-                                database.typesDao().insertPosts(msgsTypesList)
-                            } catch (e: Exception) {
-                                Log.e("DB Error", "خطأ أثناء حفظ الأنواع: ${e.message}")
-                            }
-                        }
-
-                        // لكل نوع، جلب الرسائل الخاصة به
-                        for (nokatType in msgsTypesList) {
-                            refreshMsgswithID(apiService, database, nokatType.id)
-                        }
-
-                        page++ // الانتقال للصفحة التالية
-                    } else {
-                        break // لا يوجد أنواع إضافية، إيقاف التكرار
-                    }
-                } else {
-                    Log.e("API Error", response.errorBody()?.string() ?: "خطأ غير معروف")
-                    msgsTypesList = emptyList()
-                }
-            } while (msgsTypesList.isNotEmpty())
-
-        } catch (e: IOException) {
-            Log.e("Network Error", "مشكلة في الاتصال: ${e.message}")
-            throw e
-        } catch (e: HttpException) {
-            Log.e("HTTP Error", "خطأ في الخادم: ${e.message}")
-        }
-    } else {
-        Snackbar.make(view, "يرجى التحقق من اتصالك بالإنترنت..", Snackbar.LENGTH_SHORT).show()
-    }
-}
-
-* suspend fun refreshMsgswithID(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
-    var page = 1
-    val allMsgs = mutableListOf<MsgsModel>()
-    var isLastPage = false
-
-    try {
-        do {
-            Log.d("API Debug", "جلب الرسائل للنوع ID: $ID_Type_id، الصفحة: $page")
-            val response = apiService.getMsgs_Ser2(ID_Type_id, page)
-
-            if (response.isSuccessful) {
-                val msgList = response.body()?.results?.MsgsModel ?: emptyList()
-
-                if (msgList.isNotEmpty()) {
-                    allMsgs.addAll(msgList)
-                    page++ // جلب الصفحة التالية
-                } else {
-                    Log.d("API Info", "لا توجد رسائل إضافية في الصفحة: $page")
-                    isLastPage = true
-                }
-
-            } else {
-                when (response.code()) {
-                    404 -> {
-                        Log.e("API Error", "الصفحة $page غير موجودة للنوع ID: $ID_Type_id، تم التوقف.")
-                        isLastPage = true
-                    }
-                    else -> {
-                        Log.e("API Error", "فشل في جلب الرسائل: ${response.errorBody()?.string()}")
-                        isLastPage = true
-                    }
-                }
-            }
-
-        } while (!isLastPage)
-
-        if (allMsgs.isNotEmpty()) {
-            Log.d("API Debug", "حفظ ${allMsgs.size} رسالة في قاعدة البيانات للنوع ID: $ID_Type_id")
-            withContext(Dispatchers.IO) {
-                database.msgsDao().insert_msgs(allMsgs)
-            }
-        } else {
-            Log.d("API Info", "لا توجد رسائل لحفظها في قاعدة البيانات للنوع ID: $ID_Type_id")
-        }
-
-    } catch (e: IOException) {
-        Log.e("Network Error", "مشكلة في الشبكة: ${e.message}")
-        throw IOException("Network error", e)
-    } catch (e: HttpException) {
-        Log.e("HTTP Error", "خطأ HTTP: ${e.message}")
-    } catch (e: Exception) {
-        Log.e("General Error", "خطأ غير متوقع: ${e.message}")
-    }
-}
-*/
-
     suspend fun refreshMsgsType(apiService: ApiService, database: PostDatabase, view: View) {
         if (internetCheck(context)) {
-            var page = 1 // البدء بالصفحة الأولى
+            var page = 1
             var msgsTypesList: List<MsgsTypesModel>
 
             try {
@@ -241,29 +79,30 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
                     val response = apiService.getMsgsTypes_Ser2(page)
                     if (response.isSuccessful) {
                         msgsTypesList = response.body()?.results?.MsgsTypesModel ?: emptyList()
+
                         if (msgsTypesList.isNotEmpty()) {
-
-
+                            // حفظ الأنواع في قاعدة البيانات
                             withContext(Dispatchers.IO) {
-                                try {
-                                    database.typesDao().insertPosts(msgsTypesList)
-
-                                } catch (e: Exception) {
-                                    Log.e("DB Error", "Error deleting all posts: ${e.message}")
-                                }
+                                database.typesDao().insertPosts(msgsTypesList)
                             }
 
+                            // جلب كل نوع بشكل متوازي
+                            coroutineScope {
+                                val jobs = msgsTypesList.map { type ->
+                                    async {
+                                        refreshMsgswithID(apiService, database, type.id)
+                                    }
+                                }
+                                jobs.awaitAll() // انتظار كل العمليات أن تكتمل
+                            }
 
                             page++
-                            for (nokatType in msgsTypesList) {
-                                refreshMsgswithID(apiService, database, nokatType.id)
-                            }
                         } else {
-                            break // أوقف التكرار إذا لم يكن هناك بيانات
+                            break
                         }
                     } else {
                         Log.e("API Error", response.errorBody()?.string() ?: "Unknown error")
-                        msgsTypesList = emptyList() // تعيين القائمة كفارغة لإيقاف التكرار
+                        msgsTypesList = emptyList()
                     }
                 } while (msgsTypesList.isNotEmpty())
             } catch (e: IOException) {
@@ -279,151 +118,32 @@ class VM_Msgs(private val repo_type: Repo_Type, val context: Context, val databa
 
     suspend fun refreshMsgswithID(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
         var page = 1
-        val allMsgs = mutableListOf<MsgsModel>() // قائمة لتجميع جميع الرسائل من كل الصفحات
+        val allMsgs = mutableListOf<MsgsModel>()
         var isLastPage = false
 
         try {
             do {
-                Log.d("API Debug", "Fetching messages for ID_Type_id: $ID_Type_id, page: $page")
                 val response = apiService.getMsgs_Ser2(ID_Type_id, page)
-
                 if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    val msgList = responseBody?.results?.MsgsModel ?: emptyList()
-
+                    val msgList = response.body()?.results?.MsgsModel ?: emptyList()
                     if (msgList.isNotEmpty()) {
-                        Log.d("API Debug", "Fetched ${msgList.size} messages for ID_Type_id: $ID_Type_id, page: $page")
-                        allMsgs.addAll(msgList) // أضف جميع الرسائل إلى القائمة
-                        page++ // الانتقال إلى الصفحة التالية
+                        allMsgs.addAll(msgList)
+                        page++
                     } else {
-                        Log.d("API Info", "No more messages found for ID_Type_id: $ID_Type_id on page: $page")
-                        isLastPage = true // الصفحة فارغة، اعتبرها الأخيرة
+                        isLastPage = true
                     }
                 } else {
-                    // التعامل مع الأخطاء المحتملة في الرد من الـ API
-                    when (response.code()) {
-                        404 -> {
-                            Log.e("API Error", "Page $page not found for ID_Type_id: $ID_Type_id, stopping fetch.")
-                            isLastPage = true // إذا كانت الصفحة غير موجودة، أوقف التكرار
-                        }
-                        else -> {
-                            Log.e("API Error", "Failed to fetch messages: ${response.errorBody()?.string() ?: "Unknown error"} for ID_Type_id: $ID_Type_id, page: $page")
-                            isLastPage = true // توقف التكرار عند حدوث خطأ
-                        }
-                    }
+                    isLastPage = true
                 }
             } while (!isLastPage)
 
             if (allMsgs.isNotEmpty()) {
-                // إدخال جميع الرسائل في قاعدة البيانات دفعة واحدة بعد الجلب
-                Log.d("API Debug", "Inserting all ${allMsgs.size} messages into the database for ID_Type_id: $ID_Type_id")
-
-                database.msgsDao().insert_msgs(allMsgs)
-            } else {
-                Log.d("API Info", "No messages to insert into the database for ID_Type_id: $ID_Type_id")
+                withContext(Dispatchers.IO) {
+                    database.msgsDao().insert_msgs(allMsgs)
+                }
             }
-        } catch (e: IOException) {
-            Log.e("Network Error", "Network error occurred: ${e.message}")
-            // عرض رسالة للمستخدم توضح أن هناك مشكلة في الشبكة
-            throw IOException("Network error", e)
-        } catch (e: HttpException) {
-            Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
-            // عرض رسالة للمستخدم توضح أن هناك مشكلة في الرد من الخادم
         } catch (e: Exception) {
-            Log.e("General Error", "An unexpected error occurred: ${e.message}")
-            // معالجة الأخطاء العامة لمنع تعطل التطبيق
-        }
-    }
-
-
-    suspend fun refreshMsgswithID3(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
-        var page = 1 // البدء بالصفحة الأولى
-        var msgList: List<MsgsModel>
-        var isLastPage = false // متغير للتحقق مما إذا كانت الصفحة الأخيرة
-
-        try {
-            do {
-                Log.d("API Debug", "Fetching messages for ID_Type_id: $ID_Type_id, page: $page")
-                val response = apiService.getMsgs_Ser2(ID_Type_id, page)
-
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    msgList = responseBody?.results?.MsgsModel ?: emptyList()
-
-                    if (msgList.isNotEmpty()) {
-                        Log.d("API Debug", "Inserting ${msgList.size} messages into database for ID_Type_id: $ID_Type_id, page: $page")
-                        database.msgsDao().insert_msgs(msgList)
-                        page++ // الانتقال إلى الصفحة التالية فقط إذا كانت البيانات موجودة
-                    } else {
-                        Log.d("API Info", "No more messages found for ID_Type_id: $ID_Type_id on page: $page")
-                        isLastPage = true // إذا كانت القائمة فارغة، اعتبر أنها الصفحة الأخيرة
-                    }
-                } else {
-                    // التحقق من حالة الخطأ
-                    when (response.code()) {
-                        404 -> {
-                            Log.e("API Error", "Invalid page: $page for ID_Type_id: $ID_Type_id, stopping fetch.")
-                            isLastPage = true // توقف إذا كانت الصفحة غير موجودة
-                        }
-                        else -> {
-                            Log.e("API Error", "Failed to fetch messages: ${response.errorBody()?.string() ?: "Unknown error"} for ID_Type_id: $ID_Type_id, page: $page")
-                            isLastPage = true // يمكنك اختيار إيقاف التكرار في حالة الخطأ
-                        }
-                    }
-                }
-            } while (!isLastPage) // استمر في التكرار حتى يتم كسر الحلقة عند الصفحة الأخيرة
-        } catch (e: IOException) {
-            Log.e("Network Error", "Network error occurred: ${e.message}")
-            throw IOException("Network error", e)
-        } catch (e: HttpException) {
-            Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
-        } catch (e: Exception) {
-            Log.e("General Error", "An unexpected error occurred: ${e.message}")
-        }
-    }
-
-
-
-    suspend fun refreshMsgswithID2(apiService: ApiService, database: PostDatabase, ID_Type_id: Int) {
-        var page = 1 // البدء بالصفحة الأولى
-
-        try {
-            do {
-                Log.d("API Debug", "Fetching messages for ID_Type_id: $ID_Type_id, page: $page")
-                val response = apiService.getMsgs_Ser2(ID_Type_id, page)
-
-                if (response.isSuccessful) {
-                    val msgList = response.body()?.results?.MsgsModel ?: emptyList()
-
-                    if (msgList.isNotEmpty()) {
-                        Log.d("API Debug", "Inserting ${msgList.size} messages into database for ID_Type_id: $ID_Type_id, page: $page")
-                        database.msgsDao().insert_msgs(msgList)
-                        page++ // الانتقال إلى الصفحة التالية فقط إذا كانت البيانات موجودة
-                    } else {
-                        Log.d("API Info", "No more messages found for ID_Type_id: $ID_Type_id on page: $page")
-                        break // إذا كانت القائمة فارغة، أوقف التكرار
-                    }
-                } else {
-                    // التحقق من حالة الخطأ
-                    when (response.code()) {
-                        404 -> {
-                            Log.e("API Error", "Invalid page: $page for ID_Type_id: $ID_Type_id, stopping fetch.")
-                            break // إيقاف التكرار إذا كانت الصفحة غير صحيحة
-                        }
-                        else -> {
-                            Log.e("API Error", "Failed to fetch messages: ${response.errorBody()?.string() ?: "Unknown error"} for ID_Type_id: $ID_Type_id, page: $page")
-                            break // يمكنك اختيار إيقاف التكرار في حالة الخطأ
-                        }
-                    }
-                }
-            } while (true) // استمر في التكرار حتى يتم كسر الحلقة
-        } catch (e: IOException) {
-            Log.e("Network Error", "Network error occurred: ${e.message}")
-            throw IOException("Network error", e)
-        } catch (e: HttpException) {
-            Log.e("HTTP Error", "HTTP error occurred: ${e.message}")
-        } catch (e: Exception) {
-            Log.e("General Error", "An unexpected error occurred: ${e.message}")
+            Log.e("Error", "Failed to fetch msgs for type $ID_Type_id: ${e.message}")
         }
     }
 
