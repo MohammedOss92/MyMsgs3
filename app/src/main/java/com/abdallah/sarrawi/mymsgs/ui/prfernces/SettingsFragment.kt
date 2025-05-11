@@ -37,6 +37,7 @@ class SettingsFragment : Fragment() {
         appVers()
         privacypoli()
         rateApp()
+        myapp()
 
 
         return binding.root
